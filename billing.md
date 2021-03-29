@@ -9,6 +9,7 @@
     - [API Keys](#api-keys)
     - [Currency Configuration](#currency-configuration)
     - [Logging](#logging)
+    - [Using Custom Models](#using-custom-models)
 - [Customers](#customers)
     - [Retrieving Customers](#retrieving-customers)
     - [Creating Customers](#creating-customers)
@@ -27,6 +28,7 @@
     - [Changing Plans](#changing-plans)
     - [Subscription Quantity](#subscription-quantity)
     - [Multiplan Subscriptions](#multiplan-subscriptions)
+    - [Metered Billing](#metered-billing)
     - [Subscription Taxes](#subscription-taxes)
     - [Subscription Anchor Date](#subscription-anchor-date)
     - [Cancelling Subscriptions](#cancelling-subscriptions)
@@ -65,7 +67,7 @@ Laravel Cashier provides an expressive, fluent interface to [Stripe's](https://s
 <a name="upgrading-cashier"></a>
 ## Upgrading Cashier
 
-When upgrading to a new version of Cashier, it's important that you carefully review [the upgrade guide](https://github.com/laravel/cashier-stripe/blob/master/UPGRADE.md).
+When upgrading to a new version of Cashier, it's important that you carefully review [the upgrade guide](https://github.com/laravel/cashier-stripe/blob/master/UPGRADE).
 
 > {note} To prevent breaking changes, Cashier uses a fixed Stripe API version. Cashier 12 utilizes Stripe API version `2020-03-02`. The Stripe API version will be updated on minor releases in order to make use of new Stripe features and improvements.
 
@@ -153,6 +155,34 @@ In addition to configuring Cashier's currency, you may also specify a locale to 
 Cashier allows you to specify the log channel to be used when logging all Stripe related exceptions. You may specify the log channel by defining the `CASHIER_LOGGER` environment variable within your application's `.env` file:
 
     CASHIER_LOGGER=stack
+
+<a name="using-custom-models"></a>
+### Using Custom Models
+
+You are free to extend the models used internally by Cashier by defining your own model and extending the corresponding Cashier model:
+
+    use Laravel\Cashier\Subscription as CashierSubscription;
+
+    class Subscription extends CashierSubscription
+    {
+        // ...
+    }
+
+After defining your model, you may instruct Cashier to use your custom model via the `Laravel\Cashier\Cashier` class. Typically, you should inform Cashier about your custom models in the `boot` method of your application's `App\Providers\AppServiceProvider` class:
+
+    use App\Models\Cashier\Subscription;
+    use App\Models\Cashier\SubscriptionItem;
+
+    /**
+     * Bootstrap any application services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        Cashier::useSubscriptionModel(Subscription::class);
+        Cashier::useSubscriptionItemModel(SubscriptionItem::class);
+    }
 
 <a name="customers"></a>
 ## Customers
@@ -462,7 +492,7 @@ If you would like to apply a coupon when creating the subscription, you may use 
     $user->newSubscription('default', 'price_monthly')
          ->withCoupon('code')
          ->create($paymentMethod);
-         
+
 Or, if you would like to apply a [Stripe promotion code](https://stripe.com/docs/billing/subscriptions/discounts/codes), you may use the `withPromotionCode` method:
 
     $user->newSubscription('default', 'price_monthly')
@@ -479,6 +509,15 @@ If you would like to add a subscription to a customer who already has a default 
     $user = User::find(1);
 
     $user->newSubscription('default', 'price_premium')->add();
+
+<a name="creating-subscriptions-from-the-stripe-dashboard"></a>
+#### Creating Subscriptions From The Stripe Dashboard
+
+You may also create subscriptions from the Stripe dashboard itself. When doing so, Cashier will sync newly added subscriptions and assign them a name of `default`. To customize the subscription name that is assigned to dashboard created subscriptions, [extend the `WebhookController`](/docs/{{version}}/billing#defining-webhook-event-handlers) and overwrite the `newSubscriptionName` method.
+
+In addition, you may only create one type of subscription via the Stripe dashboard. If your application offers multiple subscriptions that use different names, only one type of subscription may be added through the Stripe dashboard.
+
+Finally, you should always make sure to only add one active subscription per type of subscription offered by your application. If customer has two `default` subscriptions, only the most recently added subscription will be used by Cashier even though both would be synced with your application's database.
 
 <a name="checking-subscription-status"></a>
 ### Checking Subscription Status
@@ -821,6 +860,86 @@ You can also retrieve a specific plan using the `findItemOrFail` method:
 
     $subscriptionItem = $user->subscription('default')->findItemOrFail('chat-plan');
 
+<a name="metered-billing"></a>
+### Metered Billing
+
+[Metered billing](https://stripe.com/docs/billing/subscriptions/metered-billing) allows you to charge customers based on their product usage during a billing cycle. For example, you may charge customers based on the number of text messages or emails they send per month.
+
+To start using metered billing, you will first need to create a new product in your Stripe dashboard with a metered price. Then, use the `meteredPlan` to add the metered price ID to a customer subscription:
+
+    use Illuminate\Http\Request;
+
+    Route::post('/user/subscribe', function (Request $request) {
+        $request->user()->newSubscription('default', [])
+            ->meteredPlan('price_metered')
+            ->create($request->paymentMethodId);
+
+        // ...
+    });
+
+You may also start a metered subscription via [Stripe Checkout](#checkout):
+
+    $checkout = Auth::user()
+            ->newSubscription('default', [])
+            ->meteredPlan('price_metered')
+            ->checkout();
+
+    return view('your-checkout-view', [
+        'checkout' => $checkout,
+    ]);
+
+<a name="reporting-usage"></a>
+#### Reporting Usage
+
+As your customer uses your application, you will report their usage to Stripe so that they can be billed accurately. To increment the usage of a metered subscription, you may use the `reportUsage` method:
+
+    $user = User::find(1);
+
+    $user->subscription('default')->reportUsage();
+
+By default, a "usage quantity" of 1 is added to the billing period. Alternatively, you may pass a specific amount of "usage" to add to the customer's usage for the billing period:
+
+    $user = User::find(1);
+
+    $user->subscription('default')->reportUsage(15);
+
+If your application offers multiple plans on a single subscription, you will need to use the `reportUsageFor` method to specify the metered plan / price you want to report usage for:
+
+    $user = User::find(1);
+
+    $user->subscription('default')->reportUsageFor('price_metered', 15);
+
+Sometimes, you may need to update usage which you have previously reported. To accomplish this, you may pass a timestamp or a `DateTimeInterface` instance as the second parameter to `reportUsage`. When doing so, Stripe will update the usage that was reported at that given time. You can continue to update previous usage records as the given date and time is still within the current billing period:
+
+    $user = User::find(1);
+
+    $user->subscription('default')->reportUsage(5, $timestamp);
+
+<a name="retrieving-usage-records"></a>
+#### Retrieving Usage Records
+
+To retrieve a customer's past usage, you may use a subscription instance's `usageRecords` method:
+
+    $user = User::find(1);
+
+    $usageRecords = $user->subscription('default')->usageRecords();
+
+If your application offers multiple plans on a single subscription, you may use the `usageRecordsFor` method to specify the metered plan / price that you wish to retrieve usage records for:
+
+    $user = User::find(1);
+
+    $usageRecords = $user->subscription('default')->usageRecordsFor('price_metered');
+
+The `usageRecords` and `usageRecordsFor` methods return a Collection instance containing an associative array of usage records. You may iterate over this array to display a customer's total usage:
+
+    @foreach ($usageRecords as $usageRecord) {
+        - Period Starting: {{ $usageRecord['period']['start'] }}
+        - Period Ending: {{ $usageRecord['period']['end'] }}
+        - Total Usage: {{ $usageRecord['total_usage'] }}
+    @endforeach
+
+For a full reference of all usage data returned and how to use Stripe's cursor based pagination, please consult [the official Stripe API documentation](https://stripe.com/docs/api/usage_records/subscription_item_summary_list).
+
 <a name="subscription-taxes"></a>
 ### Subscription Taxes
 
@@ -918,6 +1037,10 @@ If you wish to cancel a subscription immediately, call the `cancelNow` method on
 
     $user->subscription('default')->cancelNow();
 
+If you wish to cancel a subscription immediately and invoice any remaining un-invoiced metered usage or new / pending proration invoice items, call the `cancelNowAndInvoice` method on the user's subscription:
+
+    $user->subscription('default')->cancelNowAndInvoice();
+
 <a name="resuming-subscriptions"></a>
 ### Resuming Subscriptions
 
@@ -966,6 +1089,10 @@ You may determine if a user is within their trial period using either the `onTri
     if ($user->subscription('default')->onTrial()) {
         //
     }
+
+You may use the `endTrial` method to immediately end a subscription trial:
+
+    $user->subscription('default')->endTrial();
 
 <a name="defining-trial-days-in-stripe-cashier"></a>
 #### Defining Trial Days In Stripe / Cashier
@@ -1386,7 +1513,7 @@ There are currently two types of payment exceptions which extend `IncompletePaym
 <a name="strong-customer-authentication"></a>
 ## Strong Customer Authentication
 
-If your business is based in Europe you will need to abide by the EU's Strong Customer Authentication (SCA) regulations. These regulations were imposed in September 2019 by the European Union to prevent payment fraud. Luckily, Stripe and Cashier are prepared for building SCA compliant applications.
+If your business is based in Europe you will need to abide by the EU's Strong Customer Authentication (SCA) regulations. These regulations were imposed in September 2019 by the European Union to prevent payment fraud. Luckily, Stripe and Cashier are prepared for building SCA compliant applications.
 
 > {note} Before getting started, review [Stripe's guide on PSD2 and SCA](https://stripe.com/guides/strong-customer-authentication) as well as their [documentation on the new SCA APIs](https://stripe.com/docs/strong-customer-authentication).
 

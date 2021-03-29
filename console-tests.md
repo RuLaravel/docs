@@ -1,17 +1,17 @@
-# Console Tests
+# Laravel 8 · Тестирование · Тесты консольных команд
 
-- [Introduction](#introduction)
-- [Input / Output Expectations](#input-output-expectations)
+- [Введение](#introduction)
+- [Ожидания ввода / вывода](#input-output-expectations)
 
 <a name="introduction"></a>
-## Introduction
+## Введение
 
-In addition to simplifying HTTP testing, Laravel provides a simple API for testing your application's [custom console commands](/docs/{{version}}/artisan).
+Помимо упрощенного HTTP-тестирования, Laravel предлагает простой API для тестирования [пользовательских консольных команд](artisan) вашего приложения.
 
 <a name="input-output-expectations"></a>
-## Input / Output Expectations
+## Ожидания ввода / вывода
 
-Laravel allows you to easily "mock" user input for your console commands using the `expectsQuestion` method. In addition, you may specify the exit code and text that you expect to be output by the console command using the `assertExitCode` and `expectsOutput` methods. For example, consider the following console command:
+Laravel позволяет вам легко «имитировать» ввод пользователем в консольных командах, используя метод `expectsQuestion`. Кроме того, вы можете указать код выхода / возврата и текст, который вы ожидаете получить от консольной команды, используя методы `assertExitCode` и `expectsOutput`. Например, рассмотрим следующую консольную команду:
 
     Artisan::command('question', function () {
         $name = $this->ask('What is your name?');
@@ -25,10 +25,10 @@ Laravel allows you to easily "mock" user input for your console commands using t
         $this->line('Your name is '.$name.' and you prefer '.$language.'.');
     });
 
-You may test this command with the following test which utilizes the `expectsQuestion`, `expectsOutput`, `doesntExpectOutput`, and `assertExitCode` methods:
+Вы можете протестировать эту команду с помощью следующего теста, который использует методы `expectsQuestion`,` expectsOutput`, `doesntExpectOutput` и `assertExitCode`:
 
     /**
-     * Test a console command.
+     * Тестирование консольной команды.
      *
      * @return void
      */
@@ -43,18 +43,18 @@ You may test this command with the following test which utilizes the `expectsQue
     }
 
 <a name="confirmation-expectations"></a>
-#### Confirmation Expectations
+#### Ожидания подтверждения
 
-When writing a command which expects confirmation in the form of a "yes" or "no" answer, you may utilize the `expectsConfirmation` method:
+При написании команды, которая ожидает подтверждения в виде ответа «да» или «нет», вы можете использовать метод `expectsConfirmation`:
 
     $this->artisan('module:import')
         ->expectsConfirmation('Do you really wish to run this command?', 'no')
         ->assertExitCode(1);
 
 <a name="table-expectations"></a>
-#### Table Expectations
+#### Таблица ожиданий
 
-If your command displays a table of information using Artisan's `table` method, it can be cumbersome to write output expectations for the entire table. Instead, you may use the `expectsTable` method. This method accepts the table's headers as its first argument and the table's data as its second argument:
+Если ваша команда отображает таблицу информации с использованием метода `table` Artisan, может быть обременительно записывать ожидаемые результаты для всей таблицы. Вместо этого вы можете использовать метод `expectsTable`. Этот метод принимает заголовки таблицы в качестве первого аргумента и данные таблицы в качестве второго аргумента:
 
     $this->artisan('users:all')
         ->expectsTable([

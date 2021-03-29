@@ -1,57 +1,67 @@
-# Resetting Passwords
+# Laravel 8 · Сброс пароля
 
-- [Introduction](#introduction)
-    - [Model Preparation](#model-preparation)
-    - [Database Preparation](#database-preparation)
-- [Routing](#routing)
-    - [Requesting The Password Reset Link](#requesting-the-password-reset-link)
-    - [Resetting The Password](#resetting-the-password)
-- [Customization](#password-customization)
+- [Введение](#introduction)
+    - [Подготовка модели](#model-preparation)
+    - [Подготовка базы данных](#database-preparation)
+    - [Конфигурирование доверенных хостов](#configuring-trusted-hosts)
+- [Маршрутизация](#routing)
+    - [Запрос ссылки для сброса пароля](#requesting-the-password-reset-link)
+    - [Сброс пароля](#resetting-the-password)
+- [Настройка](#password-customization)
 
 <a name="introduction"></a>
-## Introduction
+## Введение
 
-Most web applications provide a way for users to reset their forgotten passwords. Rather than forcing you to re-implement this by hand for every application you create, Laravel provides convenient services for sending password reset links and secure resetting passwords.
+Большинство веб-приложений предоставляют пользователям возможность сбросить забытые пароли. Вместо того, чтобы заставлять вас заново реализовывать этот функционал самостоятельно для каждого создаваемого вами приложения, Laravel предлагает удобные сервисы для отправки ссылок для сброса пароля и, собственно, безопасного сброса паролей.
 
-> {tip} Want to get started fast? Install a Laravel [application starter kit](/docs/{{version}}/starter-kits) in a fresh Laravel application. Laravel's starter kits will take care of scaffolding your entire authentication system, including resetting forgotten passwords.
+> {tip} Хотите быстро начать? Установите один из [стартовых комплектов](starter-kits) в новое приложение Laravel. Стартовые комплекты позаботятся о построении всей вашей системы аутентификации, включая сброс забытых паролей.
 
 <a name="model-preparation"></a>
-### Model Preparation
+### Подготовка модели
 
-Before using the password reset features of Laravel, your application's `App\Models\User` model must use the `Illuminate\Notifications\Notifiable` trait. Typically, this trait is already included on the default `App\Models\User` model that is created with new Laravel applications.
+Перед использованием функционала сброса пароля Laravel модель вашего приложения `App\Models\User` должна использовать трейт `Illuminate\Notifications\Notifiable`. Обычно этот трейт уже содержится по умолчанию в модели `App\Models\User` при создании новых приложений Laravel.
 
-Next, verify that your `App\Models\User` model implements the `Illuminate\Contracts\Auth\CanResetPassword` contract. The `App\Models\User` model included with the framework already implements this interface, and uses the `Illuminate\Auth\Passwords\CanResetPassword` trait to include the methods needed to implement the interface.
+Затем убедитесь, что ваша модель `App\Models\User` реализует контракт `Illuminate\Contracts\Auth\CanResetPassword`. Модель `App\Models\User` Laravel, уже реализует этот интерфейс и использует трейт `Illuminate\Auth\Passwords\CanResetPassword`, включающий методы, необходимые для реализации интерфейса.
 
 <a name="database-preparation"></a>
-### Database Preparation
+### Подготовка базы данных
 
-A table must be created to store your application's password reset tokens. The migration for this table is included in the default Laravel application, so you only need to migrate your database to create this table:
+Необходимо создать таблицу для сохранения токенов сброса пароля вашего приложения. Миграция для этой таблицы содержится по умолчанию в Laravel, поэтому вам нужно только выполнить миграцию БД для создания этой таблицы:
 
     php artisan migrate
 
-<a name="routing"></a>
-## Routing
+<a name="configuring-trusted-hosts"></a>
+### Конфигурирование доверенных хостов
 
-To properly implement support for allowing users to reset their passwords, we will need to define several routes. First, we will need a pair of routes to handle allowing the user to request a password reset link via their email address. Second, we will need a pair of routes to handle actually resetting the password once the user visits the password reset link that is emailed to them and completes the password reset form.
+По умолчанию Laravel будет отвечать на все запросы, которые он получает, независимо от содержимого заголовка `Host` HTTP-запроса. Кроме того, значение заголовка `Host` будет использоваться при генерации абсолютных URL-адресов вашего приложения во время веб-запроса.
+
+Как правило, вам следует настроить свой веб-сервер (Nginx или Apache), так, чтобы он обслуживал запросы, соответствующие только указанному имени хоста. Однако, если у вас нет возможности напрямую настроить свой веб-сервер и вам нужно указать Laravel, чтобы он отвечал только на определенные имена хостов, вы можете сделать это, задействовав посредник `App\Http\Middleware\TrustHosts` для вашего приложения. Это особенно важно, когда ваше приложение предлагает функционал сброса пароля.
+
+Чтобы узнать больше об этом посреднике, обратитесь к [документации посредника `TrustHosts`](requests.md#configuring-trusted-hosts).
+
+<a name="routing"></a>
+## Маршрутизация
+
+Чтобы правильно реализовать поддержку, позволяющую пользователям сбрасывать свои пароли, нам нужно будет определить несколько маршрутов. Во-первых, нам понадобится пара маршрутов для обработки, позволяющей пользователю запрашивать ссылку для сброса пароля через свой адрес электронной почты. Во-вторых, нам понадобится пара маршрутов для обработки фактического сброса пароля при посещении пользователем ссылки для сброса пароля, отправленной ему по электронной почте, и последующего заполнения формы сброса пароля.
 
 <a name="requesting-the-password-reset-link"></a>
-### Requesting The Password Reset Link
+### Запрос ссылки для сброса пароля
 
 <a name="the-password-reset-link-request-form"></a>
-#### The Password Reset Link Request Form
+#### Форма запроса ссылки для сброса пароля
 
-First, we will define the routes that are needed to request password reset links. To get started, we will define a route that returns a view with the password reset link request form:
+Сначала мы определим маршруты, которые необходимы для запроса ссылок для сброса пароля. Для начала мы определим маршрут, который возвращает шаблон с формой запроса ссылки для сброса пароля:
 
     Route::get('/forgot-password', function () {
         return view('auth.forgot-password');
     })->middleware('guest')->name('password.request');
 
-The view that is returned by this route should have a form containing an `email` field, which will allow the user to request a password reset link for a given email address.
+Шаблон, возвращаемый этим маршрутом, должен иметь форму с полем `email` для указания адреса электронной почты, позволяющем пользователю запросить ссылку для сброса пароля.
 
 <a name="password-reset-link-handling-the-form-submission"></a>
-#### Handling The Form Submission
+#### Обработка отправки формы
 
-Next, we will define a route that handles the form submission request from the "forgot password" view. This route will be responsible for validating the email address and sending the password reset request to the corresponding user:
+Затем мы определим маршрут, который обрабатывает запрос на отправку формы из шаблона `forgot-password`. Этот маршрут будет отвечать за проверку адреса электронной почты и отправку запроса на сброс пароля соответствующему пользователю:
 
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\Password;
@@ -68,32 +78,32 @@ Next, we will define a route that handles the form submission request from the "
                     : back()->withErrors(['email' => __($status)]);
     })->middleware('guest')->name('password.email');
 
-Before moving on, let's examine this route in more detail. First, the request's `email` attribute is validated. Next, we will use Laravel's built-in "password broker" (via the `Password` facade) to send a password reset link to the user. The password broker will take care of retrieving the user by the given field (in this case, the email address) and sending the user a password reset link via Laravel's built-in [notification system](/docs/{{version}}/notifications).
+Прежде чем двигаться дальше, давайте рассмотрим этот маршрут более подробно. Сначала проверяется атрибут запроса `email`. Затем мы будем использовать встроенный в Laravel «брокер паролей» через фасад `Password`, чтобы отправить пользователю ссылку для сброса пароля. Брокер паролей позаботится о получении пользователя по указанному полю (в данном случае по адресу электронной почты) и отправит пользователю ссылку для сброса пароля через встроенную [систему уведомлений](notifications) Laravel.
 
-The `sendResetLink` method returns a "status" slug. This status may be translated using Laravel's [localization](/docs/{{version}}/localization) helpers in order to display a user-friendly message to the user regarding the status of their request. The translation of the password reset status is determined by your application's `resources/lang/{lang}/passwords.php` language file. An entry for each possible value of the status slug is located within the `passwords` language file.
+Метод `sendResetLink` возвращает ключ «status». Этот статус может быть переведен с помощью помощников [локализации](localization) Laravel, чтобы показать пользователю удобное сообщение о статусе его запроса. Перевод статуса сброса пароля определяется языковым файлом `resources/lang/{lang}/passwords.php` вашего приложения. Запись для каждого возможного значения ключа статуса находится в языковом файле `passwords`.
 
-You may be wondering how Laravel knows how to retrieve the user record from your application's database when calling the `Password` facade's `sendResetLink` method. The Laravel password broker utilizes your authentication system's "user providers" to retrieve database records. The user provider used by the password broker is configured within the `passwords` configuration array of your `config/auth.php` configuration file. To learn more about writing custom user providers, consult the [authentication documentation](/docs/{{version}}/authentication#adding-custom-user-providers)
+Вам может быть интересно: как Laravel знает о том, как получить запись пользователя из базы данных вашего приложения при вызове метода `sendResetLink` фасада `Password`? Брокер паролей Laravel использует «поставщиков пользователей» вашей системы аутентификации для получения записей из базы данных. Поставщик пользователей, используемый брокером паролей, настраивается в массиве `passwords` вашего файла конфигурации `config/auth.php`. Чтобы узнать больше о создании пользовательских поставщиков служб, обратитесь к [документации по аутентификации](authentication.md#adding-custom-user-providers).
 
-> {tip} When manually implementing password resets, you are required to define the contents of the views and routes yourself. If you would like scaffolding that includes all necessary authentication and verification logic, check out the [Laravel application starter kits](/docs/{{version}}/starter-kits).
+> {tip} При выполнении сброса пароля самостоятельно, вы должны сами определять содержимое страницы и маршрутов. Если вам необходим каркас, включающий всю необходимую логику аутентификации и проверки, ознакомьтесь со [стартовыми комплектами приложений Laravel](starter-kits).
 
 <a name="resetting-the-password"></a>
-### Resetting The Password
+### Сброс пароля
 
 <a name="the-password-reset-form"></a>
-#### The Password Reset Form
+#### Форма сброса пароля
 
-Next, we will define the routes necessary to actually reset the password once the user clicks on the password reset link that has been emailed to them and provides a new password. First, let's define the route that will display the reset password form that is displayed when the user clicks the reset password link. This route will receive a `token` parameter that we will use later to verify the password reset request:
+Затем мы определим маршруты, необходимые для фактического сброса пароля, когда пользователь щелкает ссылку для сброса пароля, отправленную ему по электронной почте, и предоставляет новый пароль. Во-первых, давайте определим маршрут, который будет отображать форму сброса пароля, после того как пользователь щелкает ссылку сброса пароля. Этот маршрут получит параметр `token`, который мы будем использовать позже для проверки запроса на сброс пароля:
 
     Route::get('/reset-password/{token}', function ($token) {
         return view('auth.reset-password', ['token' => $token]);
     })->middleware('guest')->name('password.reset');
 
-The view that is returned by this route should display a form containing an `email` field, a `password` field, a `password_confirmation` field, and a hidden `token` field, which should contain the value of the secret `$token` received by our route.
+Экран, возвращаемый этим маршрутом, должен отображать форму, содержащую поле `email`, поле `password`, поле `password_confirmation` и скрытое поле `token`, которое должно содержать значение секретного `$token`, полученного нашим маршрутом.
 
 <a name="password-reset-handling-the-form-submission"></a>
-#### Handling The Form Submission
+#### Обработка отправки формы
 
-Of course, we need to define a route to actually handle the password reset form submission. This route will be responsible for validating the incoming request and updating the user's password in the database:
+Конечно, нам нужно определить маршрут для фактической обработки отправки формы сброса пароля. Этот маршрут будет отвечать за проверку входящего запроса и обновление пароля пользователя в базе данных:
 
     use Illuminate\Auth\Events\PasswordReset;
     use Illuminate\Http\Request;
@@ -113,9 +123,9 @@ Of course, we need to define a route to actually handle the password reset form 
             function ($user, $password) use ($request) {
                 $user->forceFill([
                     'password' => Hash::make($password)
-                ])->save();
+                ])->setRememberToken(Str::random(60));
 
-                $user->setRememberToken(Str::random(60));
+                $user->save();
 
                 event(new PasswordReset($user));
             }
@@ -126,26 +136,26 @@ Of course, we need to define a route to actually handle the password reset form 
                     : back()->withErrors(['email' => [__($status)]]);
     })->middleware('guest')->name('password.update');
 
-Before moving on, let's examine this route in more detail. First, the request's `token`, `email`, and `password` attributes are validated. Next, we will use Laravel's built-in "password broker" (via the `Password` facade) to validate the password reset request credentials.
+Прежде чем двигаться дальше, давайте рассмотрим этот маршрут более подробно. Сначала проверяются атрибуты запроса `token`, `email`, и `password`. Далее мы будем использовать встроенный в Laravel «брокер паролей» (через фасад `Password`) для проверки учетных данных запроса сброса пароля.
 
-If the token, email address, and password given to the password broker are valid, the closure passed to the `reset` method will be invoked. Within this closure, which receives the user instance and the plain-text password provided to the password reset form, we may update the user's password in the database.
+Если токен, адрес электронной почты и пароль, переданные брокеру паролей, действительны, будет вызвано замыкание, переданное методу `reset`. В рамках этого замыкания, которое получает экземпляр пользователя и пароль в виде обычного текста из формы сброса пароля, мы можем обновить пароль пользователя в базе данных.
 
-The `reset` method returns a "status" slug. This status may be translated using Laravel's [localization](/docs/{{version}}/localization) helpers in order to display a user-friendly message to the user regarding the status of their request. The translation of the password reset status is determined by your application's `resources/lang/{lang}/passwords.php` language file. An entry for each possible value of the status slug is located within the `passwords` language file.
+Метод `reset` возвращает ключ «status». Этот статус может быть переведен с помощью помощников [локализации](localization) Laravel, чтобы показать пользователю удобное сообщение о статусе его запроса.Перевод статуса сброса пароля определяется языковым файлом `resources/lang/{lang}/passwords.php` вашего приложения. Запись для каждого возможного значения ключа статуса находится в языковом файле `passwords`.
 
-Before moving on, you may be wondering how Laravel knows how to retrieve the user record from your application's database when calling the `Password` facade's `reset` method. The Laravel password broker utilizes your authentication system's "user providers" to retrieve database records. The user provider used by the password broker is configured within the `passwords` configuration array of your `config/auth.php` configuration file. To learn more about writing custom user providers, consult the [authentication documentation](/docs/{{version}}/authentication#adding-custom-user-providers)
+Прежде чем двигаться дальше, вам может быть интересно, как Laravel знает, как получить запись пользователя из базы данных вашего приложения при вызове метода `reset` фасада `Password`. Брокер паролей Laravel использует «поставщиков пользователей» вашей системы аутентификации для получения записей из базы данных. Поставщик пользователей, используемый брокером паролей, настраивается в массиве `passwords` вашего файла конфигурации `config/auth.php`. Чтобы узнать больше о создании пользовательских поставщиков служб, обратитесь к [документации по аутентификации](authentication.md#adding-custom-user-providers).
 
 <a name="password-customization"></a>
-## Customization
+## Настройка
 
 <a name="reset-link-customization"></a>
-#### Reset Link Customization
+#### Настройка ссылки для сброса
 
-You may customize the password reset link URL using the `createUrlUsing` method provided by the `ResetPassword` notification class. This method accepts a closure which receives the user instance that is receiving the notification as well as the password reset link token. Typically, you should call this method from your `App\Providers\AuthServiceProvider` service provider's `boot` method:
+Вы можете изменить URL-адрес ссылки для сброса пароля, используя метод `createUrlUsing` класса уведомлений `ResetPassword`. Этот метод принимает замыкание, которое получает экземпляр ожидающего уведомление пользователя, а также токен ссылки для сброса пароля. Как правило, вызов этого метода осуществляется в методе `boot` вашего поставщика служб `App\Providers\AuthServiceProvider`:
 
     use Illuminate\Auth\Notifications\ResetPassword;
 
     /**
-     * Register any authentication / authorization services.
+     * Регистрация любых служб аутентификации / авторизации.
      *
      * @return void
      */
@@ -159,14 +169,14 @@ You may customize the password reset link URL using the `createUrlUsing` method 
     }
 
 <a name="reset-email-customization"></a>
-#### Reset Email Customization
+#### Настройка уведомлений о сбросе пароля
 
-You may easily modify the notification class used to send the password reset link to the user. To get started, override the `sendPasswordResetNotification` method on your `App\Models\User` model. Within this method, you may send the notification using any [notification class](/docs/{{version}}/notifications) of your own creation. The password reset `$token` is the first argument received by the method. You may use this `$token` to build the password reset URL of your choice and send your notification to the user:
+Вы можете легко изменить класс уведомления, используемый для отправки пользователю ссылки для сброса пароля. Для начала переопределите метод `sendPasswordResetNotification` в модели `App\Models\User`. В этом методе вы можете отправить уведомление, используя любой [класс уведомлений](notifications), созданный вами. Токен для сброса пароля – это первый аргумент, получаемый методом. Вы можете использовать этот `$token` для создания URL сброса пароля по вашему усмотрению и для дальнейшей отправки уведомления пользователю:
 
     use App\Notifications\ResetPasswordNotification;
 
     /**
-     * Send a password reset notification to the user.
+     * Отправить пользователю уведомление о сбросе пароля.
      *
      * @param  string  $token
      * @return void

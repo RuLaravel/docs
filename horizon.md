@@ -23,7 +23,7 @@ Laravel Horizon provides a beautiful dashboard and code-driven configuration for
 
 When using Horizon, all of your queue worker configuration is stored in a single, simple configuration file. By defining your application's worker configuration in a version controlled file, you may easily scale or modify your application's queue workers when deploying your application.
 
-<img src="https://laravel.com/img/docs/horizon-example.png">
+<img src="./img/horizon-example.png">
 
 <a name="installation"></a>
 ## Installation
@@ -139,7 +139,7 @@ Remember that Laravel automatically injects the authenticated user into the gate
 <a name="upgrading-horizon"></a>
 ## Upgrading Horizon
 
-When upgrading to a new major version of Horizon, it's important that you carefully review [the upgrade guide](https://github.com/laravel/horizon/blob/master/UPGRADE.md). In addition, when upgrading to any new Horizon version, you should re-publish Horizon's assets:
+When upgrading to a new major version of Horizon, it's important that you carefully review [the upgrade guide](https://github.com/laravel/horizon/blob/master/UPGRADE). In addition, when upgrading to any new Horizon version, you should re-publish Horizon's assets:
 
     php artisan horizon:publish
 

@@ -3,12 +3,14 @@
 - [Introduction](#introduction)
 - [Upgrading Cashier](#upgrading-cashier)
 - [Installation](#installation)
+    - [Paddle Sandbox](#paddle-sandbox)
     - [Database Migrations](#database-migrations)
 - [Configuration](#configuration)
     - [Billable Model](#billable-model)
     - [API Keys](#api-keys)
     - [Paddle JS](#paddle-js)
     - [Currency Configuration](#currency-configuration)
+    - [Overriding Default Models](#overriding-default-models)
 - [Core Concepts](#core-concepts)
     - [Pay Links](#pay-links)
     - [Inline Checkout](#inline-checkout)
@@ -51,7 +53,7 @@ While working with Cashier we recommend you also review Paddle's [user guides](h
 <a name="upgrading-cashier"></a>
 ## Upgrading Cashier
 
-When upgrading to a new version of Cashier, it's important that you carefully review [the upgrade guide](https://github.com/laravel/cashier-paddle/blob/master/UPGRADE.md).
+When upgrading to a new version of Cashier, it's important that you carefully review [the upgrade guide](https://github.com/laravel/cashier-paddle/blob/master/UPGRADE).
 
 <a name="installation"></a>
 ## Installation
@@ -61,6 +63,13 @@ First, install the Cashier package for Paddle using the Composer package manager
     composer require laravel/cashier-paddle
 
 > {note} To ensure Cashier properly handles all Paddle events, remember to [set up Cashier's webhook handling](#handling-paddle-webhooks).
+
+<a name="paddle-sandbox"></a>
+### Paddle Sandbox
+
+During local and staging development, you should [register a Paddle Sandbox account](https://developer.paddle.com/getting-started/sandbox). This account will give you a sandboxed environment to test and develop your applications without making actual payments. You may use Paddle's [test card numbers](https://developer.paddle.com/getting-started/sandbox#test-cards) to simulate various payment scenarios.
+
+After you have finished developing your application you may [apply for a Paddle vendor account](https://paddle.com).
 
 <a name="database-migrations"></a>
 ### Database Migrations
@@ -120,6 +129,9 @@ Next, you should configure your Paddle keys in your application's `.env` file. Y
     PADDLE_VENDOR_ID=your-paddle-vendor-id
     PADDLE_VENDOR_AUTH_CODE=your-paddle-vendor-auth-code
     PADDLE_PUBLIC_KEY="your-paddle-public-key"
+    PADDLE_SANDBOX=true
+
+The `PADDLE_SANDBOX` environment variable should be set to `true` when you are using [Paddle's Sandbox environment](#paddle-sandbox). The `PADDLE_SANDBOX` variable should be set to `false` if you are deploying your application to production and are using Paddle's live vendor environment.
 
 <a name="paddle-js"></a>
 ### Paddle JS
@@ -144,6 +156,34 @@ In addition to configuring Cashier's currency, you may also specify a locale to 
     CASHIER_CURRENCY_LOCALE=nl_BE
 
 > {note} In order to use locales other than `en`, ensure the `ext-intl` PHP extension is installed and configured on your server.
+
+<a name="overriding-default-models"></a>
+### Overriding Default Models
+
+You are free to extend the models used internally by Cashier by defining your own model and extending the corresponding Cashier model:
+
+    use Laravel\Paddle\Subscription as CashierSubscription;
+
+    class Subscription extends CashierSubscription
+    {
+        // ...
+    }
+
+After defining your model, you may instruct Cashier to use your custom model via the `Laravel\Paddle\Cashier` class. Typically, you should inform Cashier about your custom models in the `boot` method of your application's `App\Providers\AppServiceProvider` class:
+
+    use App\Models\Cashier\Receipt;
+    use App\Models\Cashier\Subscription;
+
+    /**
+     * Bootstrap any application services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        Cashier::useReceiptModel(Receipt::class);
+        Cashier::useSubscriptionModel(Subscription::class);
+    }
 
 <a name="core-concepts"></a>
 ## Core Concepts
@@ -909,7 +949,7 @@ Your controller's method names should correspond to Cashier's controller method 
     class WebhookController extends CashierController
     {
         /**
-         * Handle payment succeeded.
+         * Handle the payment succeeded webhook.
          *
          * @param  array  $payload
          * @return void
@@ -1047,13 +1087,13 @@ You may optionally specify a specific amount to refund as well as a reason for t
 <a name="receipts"></a>
 ## Receipts
 
-You may easily retrieve an array of a billable model's receipts using the `receipts` method:
+You may easily retrieve an array of a billable model's receipts via the `receipts` property:
 
     use App\Models\User;
 
     $user = User::find(1);
 
-    $receipts = $user->receipts();
+    $receipts = $user->receipts;
 
 When listing the receipts for the customer, you may use the receipt instance's methods to display the relevant receipt information. For example, you may wish to list every receipt in a table, allowing the user to easily download any of the receipts:
 
@@ -1117,4 +1157,6 @@ Alternatively, you can perform more precise customization by catching the [`subs
 <a name="testing"></a>
 ## Testing
 
-Paddle currently lacks a proper CRUD API so you will need to manually test your billing flow. Paddle also lacks a sandboxed developer environment so any card charges you make are live charges. In order to work around this, we recommend you use coupons with a 100% discount or free products during testing.
+While testing, you should manually test your billing flow to make sure your integration works as expected.
+
+For automated tests, including those executed within a CI environment, you may use [Laravel's HTTP Client](/docs//{{version}}/http-client#testing) to fake HTTP calls made to Paddle. Although this does not test the actual responses from Paddle, it does provide a way to test your application without actually calling Paddle's API.

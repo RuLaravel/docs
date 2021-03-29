@@ -1,81 +1,82 @@
-# Blade Templates
+# Laravel 8 · Шаблонизатор Blade
 
-- [Introduction](#introduction)
-- [Displaying Data](#displaying-data)
-    - [HTML Entity Encoding](#html-entity-encoding)
-    - [Blade & JavaScript Frameworks](#blade-and-javascript-frameworks)
-- [Blade Directives](#blade-directives)
-    - [If Statements](#if-statements)
-    - [Switch Statements](#switch-statements)
-    - [Loops](#loops)
-    - [The Loop Variable](#the-loop-variable)
-    - [Comments](#comments)
-    - [Including Subviews](#including-subviews)
-    - [The `@once` Directive](#the-once-directive)
-    - [Raw PHP](#raw-php)
-- [Components](#components)
-    - [Rendering Components](#rendering-components)
-    - [Passing Data To Components](#passing-data-to-components)
-    - [Component Attributes](#component-attributes)
-    - [Slots](#slots)
-    - [Inline Component Views](#inline-component-views)
-    - [Anonymous Components](#anonymous-components)
-    - [Dynamic Components](#dynamic-components)
-    - [Manually Registering Components](#manually-registering-components)
-- [Building Layouts](#building-layouts)
-    - [Layouts Using Components](#layouts-using-components)
-    - [Layouts Using Template Inheritance](#layouts-using-template-inheritance)
-- [Forms](#forms)
-    - [CSRF Field](#csrf-field)
-    - [Method Field](#method-field)
-    - [Validation Errors](#validation-errors)
-- [Stacks](#stacks)
-- [Service Injection](#service-injection)
-- [Extending Blade](#extending-blade)
-    - [Custom If Statements](#custom-if-statements)
+- [Введение](#introduction)
+- [Отображение данных](#displaying-data)
+    - [Преобразование в HTML-сущности](#html-entity-encoding)
+    - [Blade и JavaScript фреймворки](#blade-and-javascript-frameworks)
+- [Директивы Blade](#blade-directives)
+    - [Операторы If](#if-statements)
+    - [Операторы Switch](#switch-statements)
+    - [Циклы](#loops)
+    - [Переменная Loop](#the-loop-variable)
+    - [Комментарии](#comments)
+    - [Подключение дочерних шаблонов](#including-subviews)
+    - [Директива `@once`](#the-once-directive)
+    - [Необработанный PHP](#raw-php)
+- [Компоненты](#components)
+    - [Отрисовка компонентов](#rendering-components)
+    - [Передача данных компонентам](#passing-data-to-components)
+    - [Атрибуты компонента](#component-attributes)
+    - [Зарезервированные ключевые слова](#reserved-keywords)
+    - [Слоты](#slots)
+    - [Встроенные шаблоны компонентов](#inline-component-views)
+    - [Анонимные компоненты](#anonymous-components)
+    - [Динамические компоненты](#dynamic-components)
+    - [Самостоятельная регистрация компонентов](#manually-registering-components)
+- [Создание макетов](#building-layouts)
+    - [Макеты с использованием компонентов](#layouts-using-components)
+    - [Макеты с использованием наследования шаблонов](#layouts-using-template-inheritance)
+- [Формы](#forms)
+    - [Поле CSRF](#csrf-field)
+    - [Поле Method](#method-field)
+    - [Ошибки валидации](#validation-errors)
+- [Стеки](#stacks)
+- [Внедрение служб](#service-injection)
+- [Расширение Blade](#extending-blade)
+    - [Пользовательские операторы If](#custom-if-statements)
 
 <a name="introduction"></a>
-## Introduction
+## Введение
 
-Blade is the simple, yet powerful templating engine that is included with Laravel. Unlike some PHP templating engines, Blade does not restrict you from using plain PHP code in your templates. In fact, all Blade templates are compiled into plain PHP code and cached until they are modified, meaning Blade adds essentially zero overhead to your application. Blade template files use the `.blade.php` file extension and are typically stored in the `resources/views` directory.
+Blade – это простой, но мощный движок шаблонов, входящий в состав Laravel. В отличие от некоторых шаблонизаторов PHP, Blade не ограничивает вас в использовании простого кода PHP в ваших шаблонах. На самом деле, все шаблоны Blade компилируются в простой код PHP и кешируются до тех пор, пока не будут изменены, что означает, что Blade добавляет фактически нулевую нагрузку вашему приложению. Файлы шаблонов Blade используют расширение файла `.blade.php` и обычно хранятся в каталоге `resources/views`.
 
-Blade views may be returned from routes or controller using the global `view` helper. Of course, as mentioned in the documentation on [views](/docs/{{version}}/views), data may be passed to the Blade view using the `view` helper's second argument:
+Шаблоны Blade могут быть возвращены из маршрутов или контроллера с помощью глобального помощника `view`. Конечно, как упоминалось в документации по [HTML-шаблонам](views), данные могут быть переданы в шаблоны Blade, используя второй аргумент помощника `view`:
 
     Route::get('/', function () {
         return view('greeting', ['name' => 'Finn']);
     });
 
-> {tip} Before digging deeper into Blade, make sure to read the Laravel [view documentation](/docs/{{version}}/views).
+> {tip} Прежде чем углубиться в Blade, обязательно прочтите Laravel [документацию по HTML-шаблонам](views).
 
 <a name="displaying-data"></a>
-## Displaying Data
+## Отображение данных
 
-You may display data that is passed to your Blade views by wrapping the variable in curly braces. For example, given the following route:
+Вы можете отображать данные, которые передаются в шаблоны Blade, заключив переменную в фигурные скобки. Например, учитывая следующий маршрут:
 
     Route::get('/', function () {
         return view('welcome', ['name' => 'Samantha']);
     });
 
-You may display the contents of the `name` variable like so:
+Вы можете отобразить содержимое переменной `name` следующим образом:
 
     Hello, {{ $name }}.
 
-> {tip} Blade's `{{ }}` echo statements are automatically sent through PHP's `htmlspecialchars` function to prevent XSS attacks.
+> {tip} Выражения вывода `{{ }}` Blade автоматически отправляются через функцию `htmlspecialchars` PHP для предотвращения XSS-атак.
 
-You are not limited to displaying the contents of the variables passed to the view. You may also echo the results of any PHP function. In fact, you can put any PHP code you wish inside of a Blade echo statement:
+Вы не ограничены отображением содержимого переменных, переданных в шаблон. Вы также можете вывести результаты любой функции PHP. Фактически, вы можете поместить любой PHP-код в выражение вывода Blade:
 
     The current UNIX timestamp is {{ time() }}.
 
 <a name="rendering-json"></a>
-#### Rendering JSON
+#### Вывод JSON
 
-Sometimes you may pass an array to your view with the intention of rendering it as JSON in order to initialize a JavaScript variable. For example:
+Иногда вы можете передать массив вашему шаблону с намерением отобразить его как JSON, чтобы инициализировать переменную JavaScript. Например:
 
     <script>
         var app = <?php echo json_encode($array); ?>;
     </script>
 
-However, instead of manually calling `json_encode`, you may use the `@json` Blade directive. The `@json` directive accepts the same arguments as PHP's `json_encode` function. By default, the `@json` directive calls the `json_encode` function with the `JSON_HEX_TAG`, `JSON_HEX_APOS`, `JSON_HEX_AMP`, and `JSON_HEX_QUOT` flags:
+Однако вместо ручного вызова `json_encode` вы можете использовать директиву `@json` Blade. Директива `@json` принимает те же аргументы, что и функция `json_encode` PHP. По умолчанию директива `@json` вызывает функцию `json_encode` с флагами `JSON_HEX_TAG`, `JSON_HEX_APOS`, `JSON_HEX_AMP`, и `JSON_HEX_QUOT`:
 
     <script>
         var app = @json($array);
@@ -83,12 +84,12 @@ However, instead of manually calling `json_encode`, you may use the `@json` Blad
         var app = @json($array, JSON_PRETTY_PRINT);
     </script>
 
-> {note} You should only use the `@json` directive to render existing variables as JSON. The Blade templating is based on regular expressions and attempts to pass a complex expression to the directive may cause unexpected failures.
+> {note} Вы должны использовать директиву `@json` только для отображения существующих переменных как JSON. Шаблонизатор Blade основан на регулярных выражениях, и попытки передать сложное выражение в директиву могут вызвать неожиданные сбои.
 
 <a name="html-entity-encoding"></a>
-### HTML Entity Encoding
+### Преобразование в HTML-сущности
 
-By default, Blade (and the Laravel `e` helper) will double encode HTML entities. If you would like to disable double encoding, call the `Blade::withoutDoubleEncoding` method from the `boot` method of your `AppServiceProvider`:
+По умолчанию Blade (и глобальный помощник `e` Laravel) будет дважды кодировать объекты HTML. Если вы хотите отключить двойное кодирование, вызовите метод `Blade::withoutDoubleEncoding` в методе `boot` вашего `AppServiceProvider`:
 
     <?php
 
@@ -100,7 +101,7 @@ By default, Blade (and the Laravel `e` helper) will double encode HTML entities.
     class AppServiceProvider extends ServiceProvider
     {
         /**
-         * Bootstrap any application services.
+         * Загрузка любых служб приложения.
          *
          * @return void
          */
@@ -111,37 +112,37 @@ By default, Blade (and the Laravel `e` helper) will double encode HTML entities.
     }
 
 <a name="displaying-unescaped-data"></a>
-#### Displaying Unescaped Data
+#### Вывод неэкранированных данных
 
-By default, Blade `{{ }}` statements are automatically sent through PHP's `htmlspecialchars` function to prevent XSS attacks. If you do not want your data to be escaped, you may use the following syntax:
+По умолчанию, выражения вывода `{{ }}` Blade автоматически отправляются через функцию `htmlspecialchars` PHP для предотвращения XSS-атак. Если вы не хотите, чтобы ваши данные были экранированы, вы можете использовать следующий синтаксис:
 
     Hello, {!! $name !!}.
 
-> {note} Be very careful when echoing content that is supplied by users of your application. You should typically use the escaped, double curly brace syntax to prevent XSS attacks when displaying user supplied data.
+> {note} Будьте очень осторожны при выводе содержимого, полученого от пользователей вашего приложения. Обычно следует использовать экранированный синтаксис двойных фигурных скобок для предотвращения атак XSS при отображении данных, предоставленных пользователем.
 
 <a name="blade-and-javascript-frameworks"></a>
-### Blade & JavaScript Frameworks
+### Blade и JavaScript фреймворки
 
-Since many JavaScript frameworks also use "curly" braces to indicate a given expression should be displayed in the browser, you may use the `@` symbol to inform the Blade rendering engine an expression should remain untouched. For example:
+Поскольку во многих фреймворках JavaScript также используются «фигурные» скобки, чтобы указать, что данное выражение должно отобразиться в браузере, вы можете использовать символ `@`, чтобы сообщить движку Blade, что выражение должно остаться нетронутым. Например:
 
     <h1>Laravel</h1>
 
     Hello, @{{ name }}.
 
-In this example, the `@` symbol will be removed by Blade; however, `{{ name }}` expression will remain untouched by the Blade engine, allowing it to be rendered by your JavaScript framework.
+В этом примере Blade удалит символ `@`; однако выражение `{{ name }}` останется нетронутым движком Blade, что позволит обработать его вашим фреймворком JavaScript.
 
-The `@` symbol may also be used to escape Blade directives:
+Символ `@` также используется для исключения из обработки директив Blade:
 
-    {{-- Blade template --}}
+    {{-- Шаблон Blade --}}
     @@json()
 
-    <!-- HTML output -->
+    <!-- Вывод HTML -->
     @json()
 
 <a name="the-at-verbatim-directive"></a>
-#### The `@verbatim` Directive
+#### Директива `@verbatim`
 
-If you are displaying JavaScript variables in a large portion of your template, you may wrap the HTML in the `@verbatim` directive so that you do not have to prefix each Blade echo statement with an `@` symbol:
+Если вы отображаете переменные JavaScript в крупной части своего шаблона, вы можете заключить HTML в директиву `@verbatim`, чтобы вам не приходилось добавлять префикс `@` к каждому выражению вывода Blade:
 
     @verbatim
         <div class="container">
@@ -150,14 +151,14 @@ If you are displaying JavaScript variables in a large portion of your template, 
     @endverbatim
 
 <a name="blade-directives"></a>
-## Blade Directives
+## Директивы Blade
 
-In addition to template inheritance and displaying data, Blade also provides convenient shortcuts for common PHP control structures, such as conditional statements and loops. These shortcuts provide a very clean, terse way of working with PHP control structures while also remaining familiar to their PHP counterparts.
+Помимо наследования шаблонов и отображения данных, Blade также содержит удобные псевдонимы для общих структур управления PHP, таких как условные операторы и циклы. Эти директивы обеспечивают очень чистый и лаконичный способ работы со структурами управления PHP, но при этом остаются схожими со своими аналогами PHP.
 
 <a name="if-statements"></a>
-### If Statements
+### Операторы If
 
-You may construct `if` statements using the `@if`, `@elseif`, `@else`, and `@endif` directives. These directives function identically to their PHP counterparts:
+Вы можете создавать операторы `if`, используя директивы `@if`, `@elseif`, `@else`, и `@endif`. Эти директивы работают так же, как и их аналоги в PHP:
 
     @if (count($records) === 1)
         I have one record!
@@ -167,68 +168,68 @@ You may construct `if` statements using the `@if`, `@elseif`, `@else`, and `@end
         I don't have any records!
     @endif
 
-For convenience, Blade also provides an `@unless` directive:
+Для удобства Blade также содержит директиву `@unless`:
 
     @unless (Auth::check())
         You are not signed in.
     @endunless
 
-In addition to the conditional directives already discussed, the `@isset` and `@empty` directives may be used as convenient shortcuts for their respective PHP functions:
+В дополнение к уже обсужденным условным директивам, директивы `@isset` и `@empty` могут использоваться в качестве удобных ярлыков для соответствующих функций PHP:
 
     @isset($records)
-        // $records is defined and is not null...
+        // Переменная $records определена и не равна `null` ...
     @endisset
 
     @empty($records)
-        // $records is "empty"...
+        // Переменная $records считается «пустой» ...
     @endempty
 
 <a name="authentication-directives"></a>
-#### Authentication Directives
+#### Директивы аутентификации
 
-The `@auth` and `@guest` directives may be used to quickly determine if the current user is [authenticated](/docs/{{version}}/authentication) or is a guest:
+Директивы `@auth` и `@guest` могут использоваться для быстрого определения, является ли текущий пользователь [аутентифицированным](authentication) или считается гостем:
 
     @auth
-        // The user is authenticated...
+        // Пользователь аутентифицирован ...
     @endauth
 
     @guest
-        // The user is not authenticated...
+        // Пользователь не аутентифицирован ...
     @endguest
 
-If needed, you may specify the authentication guard that should be checked when using the `@auth` and `@guest` directives:
+При необходимости вы можете указать охранника аутентификации для проверки при использовании директив `@auth` и `@guest`:
 
     @auth('admin')
-        // The user is authenticated...
+        // Пользователь аутентифицирован ...
     @endauth
 
     @guest('admin')
-        // The user is not authenticated...
+        // Пользователь не аутентифицирован ...
     @endguest
 
 <a name="environment-directives"></a>
-#### Environment Directives
+#### Директивы окружения
 
-You may check if the application is running in the production environment using the `@production` directive:
+Вы можете проверить, запущено ли приложение в эксплуатационном окружении, с помощью директивы `@production`:
 
     @production
-        // Production specific content...
+        // Содержимое, отображаемое только в эксплуатационном окружении ...
     @endproduction
 
-Or, you may determine if the application is running in a specific environment using the `@env` directive:
+Или вы можете определить, работает ли приложение в конкретной среде, с помощью директивы `@env`:
 
     @env('staging')
-        // The application is running in "staging"...
+        // Приложение запущено в «переходном» окружении ...
     @endenv
 
     @env(['staging', 'production'])
-        // The application is running in "staging" or "production"...
+        // Приложение запущено в «переходном» или «рабочем» окружении ...
     @endenv
 
 <a name="section-directives"></a>
-#### Section Directives
+#### Директивы секций
 
-You may determine if a template inheritance section has content using the `@hasSection` directive:
+Вы можете определить, есть ли в секции наследуемого шаблона содержимое, используя директиву `@hasSection`:
 
 ```html
 @hasSection('navigation')
@@ -240,7 +241,7 @@ You may determine if a template inheritance section has content using the `@hasS
 @endif
 ```
 
-You may use the `sectionMissing` directive to determine if a section does not have content:
+Вы можете использовать директиву `sectionMissing`, чтобы определить, что в секции нет содержимого:
 
 ```html
 @sectionMissing('navigation')
@@ -251,9 +252,9 @@ You may use the `sectionMissing` directive to determine if a section does not ha
 ```
 
 <a name="switch-statements"></a>
-### Switch Statements
+### Операторы Switch
 
-Switch statements can be constructed using the `@switch`, `@case`, `@break`, `@default` and `@endswitch` directives:
+Операторы Switch могут быть созданы с использованием директив `@switch`, `@case`, `@break`, `@default` и `@endswitch`:
 
     @switch($i)
         @case(1)
@@ -269,9 +270,9 @@ Switch statements can be constructed using the `@switch`, `@case`, `@break`, `@d
     @endswitch
 
 <a name="loops"></a>
-### Loops
+### Циклы
 
-In addition to conditional statements, Blade provides simple directives for working with PHP's loop structures. Again, each of these directives functions identically to their PHP counterparts:
+В дополнение к условным операторам, Blade содержит простые директивы для работы со структурами циклов PHP. Опять же, каждая из этих директив работает так же, как и их аналоги в PHP:
 
     @for ($i = 0; $i < 10; $i++)
         The current value is {{ $i }}
@@ -291,9 +292,9 @@ In addition to conditional statements, Blade provides simple directives for work
         <p>I'm looping forever.</p>
     @endwhile
 
-> {tip} When looping, you may use the [loop variable](#the-loop-variable) to gain valuable information about the loop, such as whether you are in the first or last iteration through the loop.
+> {tip} При создании цикла вы можете использовать [переменную Loop](#the-loop-variable), чтобы получить информацию о цикле, например, находитесь ли вы в первой или последней итерации цикла.
 
-When using loops you may also end the loop or skip the current iteration using the `@continue` and `@break` directives:
+Вы также можете завершить цикл или пропустить текущую итерацию, используя директивы `@continue` и `@break`:
 
     @foreach ($users as $user)
         @if ($user->type == 1)
@@ -307,7 +308,7 @@ When using loops you may also end the loop or skip the current iteration using t
         @endif
     @endforeach
 
-You may also include the continuation or break condition within the directive declaration:
+Вы также можете включить в объявление директивы условие продолжения или прерывания:
 
     @foreach ($users as $user)
         @continue($user->type == 1)
@@ -318,9 +319,9 @@ You may also include the continuation or break condition within the directive de
     @endforeach
 
 <a name="the-loop-variable"></a>
-### The Loop Variable
+### Переменная Loop
 
-When looping, a `$loop` variable will be available inside of your loop. This variable provides access to some useful bits of information such as the current loop index and whether this is the first or last iteration through the loop:
+Внутри цикла доступна переменная `$loop`. Она обеспечивает доступ к некоторой полезной информации, например, индекс текущего цикла, первая это или последняя итерация цикла:
 
     @foreach ($users as $user)
         @if ($loop->first)
@@ -334,44 +335,44 @@ When looping, a `$loop` variable will be available inside of your loop. This var
         <p>This is user {{ $user->id }}</p>
     @endforeach
 
-If you are in a nested loop, you may access the parent loop's `$loop` variable via the `parent` property:
+При нахождении во вложенном цикле, вы можете получить доступ к переменной `$loop` родительского цикла через свойство `parent`:
 
     @foreach ($users as $user)
         @foreach ($user->posts as $post)
             @if ($loop->parent->first)
-                This is the first iteration of the parent loop.
+                This is first iteration of the parent loop.
             @endif
         @endforeach
     @endforeach
 
-The `$loop` variable also contains a variety of other useful properties:
+Переменная `$loop` также содержит множество других полезных свойств:
 
-Property  | Description
+Свойство  | Описание
 ------------- | -------------
-`$loop->index`  |  The index of the current loop iteration (starts at 0).
-`$loop->iteration`  |  The current loop iteration (starts at 1).
-`$loop->remaining`  |  The iterations remaining in the loop.
-`$loop->count`  |  The total number of items in the array being iterated.
-`$loop->first`  |  Whether this is the first iteration through the loop.
-`$loop->last`  |  Whether this is the last iteration through the loop.
-`$loop->even`  |  Whether this is an even iteration through the loop.
-`$loop->odd`  |  Whether this is an odd iteration through the loop.
-`$loop->depth`  |  The nesting level of the current loop.
-`$loop->parent`  |  When in a nested loop, the parent's loop variable.
+`$loop->index`  |  Индекс текущей итерации цикла (начинается с 0).
+`$loop->iteration`  |  Текущая итерация цикла (начинается с 1).
+`$loop->remaining`  | Итерации, оставшиеся в цикле.
+`$loop->count`  |  Общее количество элементов в итерируемом массиве.
+`$loop->first`  |  Первая ли это итерация цикла.
+`$loop->last`  |  Последняя ли это итерация цикла.
+`$loop->even`  |  Четная ли это итерация цикла.
+`$loop->odd`  |  Нечетная ли это итерация цикла.
+`$loop->depth`  |  Уровень вложенности текущего цикла.
+`$loop->parent`  |  Переменная родительского цикла во вложенном цикле.
 
 <a name="comments"></a>
-### Comments
+### Комментарии
 
-Blade also allows you to define comments in your views. However, unlike HTML comments, Blade comments are not included in the HTML returned by your application:
+Blade также позволяет вам определять комментарии в ваших шаблонах. Однако, в отличие от комментариев HTML, комментарии Blade не будут включены в результирующий HTML, возвращаемый вашим приложением:
 
     {{-- This comment will not be present in the rendered HTML --}}
 
 <a name="including-subviews"></a>
-### Including Subviews
+### Подключение дочерних шаблонов
 
-> {tip} While you're free to use the `@include` directive, Blade [components](#components) provide similar functionality and offer several benefits over the `@include` directive such as data and attribute binding.
+> {tip} Хотя вы можете использовать директиву `@include`, [компоненты](#components) Blade содержат аналогичный функционал и предлагают несколько преимуществ по сравнению с директивой `@include`, например привязку данных и атрибутов.
 
-Blade's `@include` directive allows you to include a Blade view from within another view. All variables that are available to the parent view will be made available to the included view:
+Директива `@include` Blade позволяет вам включать шаблоны из другого шаблона. Все переменные, доступные для родительского шаблона, будут доступны для включенного шаблона:
 
 ```html
 <div>
@@ -383,298 +384,107 @@ Blade's `@include` directive allows you to include a Blade view from within anot
 </div>
 ```
 
-Even though the included view will inherit all data available in the parent view, you may also pass an array of additional data that should be made available to the included view:
+Включенный шаблон унаследует все данные, доступные в родительском шаблоне, но вы также можете передать массив дополнительных данных, которые должны быть доступны для включенного шаблона:
 
     @include('view.name', ['status' => 'complete'])
 
-If you attempt to `@include` a view which does not exist, Laravel will throw an error. If you would like to include a view that may or may not be present, you should use the `@includeIf` directive:
+Если вы попытаетесь включить несуществующий шаблон, Laravel выдаст ошибку. Если вы хотите включить шаблон, который может присутствовать или отсутствовать, вам следует использовать директиву `@includeIf`:
 
     @includeIf('view.name', ['status' => 'complete'])
 
-If you would like to `@include` a view if a given boolean expression evaluates to `true` or `false`, you may use the `@includeWhen` and `@includeUnless` directives:
+Если вы хотите включить шаблон в зависимости от результата логического выражения, возвращающего либо `true`, либо `false`, то используйте директивы `@includeWhen` и `@includeUnless`:
 
     @includeWhen($boolean, 'view.name', ['status' => 'complete'])
 
     @includeUnless($boolean, 'view.name', ['status' => 'complete'])
 
-To include the first view that exists from a given array of views, you may use the `includeFirst` directive:
+Чтобы включить первый существующий шаблон из переданного массива шаблонов, вы можете использовать директиву `includeFirst`:
 
     @includeFirst(['custom.admin', 'admin'], ['status' => 'complete'])
 
-> {note} You should avoid using the `__DIR__` and `__FILE__` constants in your Blade views, since they will refer to the location of the cached, compiled view.
+> {note} Вам следует избегать использования в ваших шаблонах Blade констант `__DIR__` и `__FILE__`, поскольку они будут ссылаться на расположение кешированного, скомпилированного шаблона.
 
 <a name="rendering-views-for-collections"></a>
-#### Rendering Views For Collections
+#### Отрисовка шаблонов с коллекциями
 
-You may combine loops and includes into one line with Blade's `@each` directive:
+Вы можете cкомбинировать циклы и подключение шаблона в одну строку с помощью директивы Blade `@each`:
 
     @each('view.name', $jobs, 'job')
 
-The `@each` directive's first argument is the view to render for each element in the array or collection. The second argument is the array or collection you wish to iterate over, while the third argument is the variable name that will be assigned to the current iteration within the view. So, for example, if you are iterating over an array of `jobs`, typically you will want to access each job as a `job` variable within the view. The array key for the current iteration will be available as the `key` variable within the view.
+Первый аргумент директивы `@each` – это шаблон, отображаемый для каждого элемента в массиве или коллекции. Второй аргумент – это массив или коллекция, которую вы хотите перебрать, а третий аргумент – это имя переменной, которая будет присвоена текущей итерации в шаблоне. Так, например, если вы выполняете итерацию по массиву `jobs`, обычно вам нужно обращаться к каждому элементу как к переменной `job` в шаблоне. Ключ массива для текущей итерации будет доступен как переменная `key` в шаблоне.
 
-You may also pass a fourth argument to the `@each` directive. This argument determines the view that will be rendered if the given array is empty.
+Вы можете передать четвертый аргумент директиве `@each`. Этот аргумент определяет шаблон, который будет отображаться, если переданный массив пуст.
 
     @each('view.name', $jobs, 'job', 'view.empty')
 
-> {note} Views rendered via `@each` do not inherit the variables from the parent view. If the child view requires these variables, you should use the `@foreach` and `@include` directives instead.
+> {note} Шаблоны, отображаемые с помощью `@each`, не наследуют переменные родительского шаблона. Если дочернему шаблону требуются эти переменные, вам следует использовать вместо них директивы `@foreach` и `@include`.
 
 <a name="the-once-directive"></a>
-### The `@once` Directive
+### Директива `@once`
 
-The `@once` directive allows you to define a portion of the template that will only be evaluated once per rendering cycle. This may be useful for pushing a given piece of JavaScript into the page's header using [stacks](#stacks). For example, if you are rendering a given [component](#components) within a loop, you may wish to only push the JavaScript to the header the first time the component is rendered:
+Директива `@once` позволяет вам определить часть шаблона, которая будет проанализирована только один раз за цикл визуализации. Это может быть полезно для вставки переданного фрагмента JavaScript в подвал страницы с помощью [стеков](#stacks). Например, если вы отображаете переданный [компонент](#components) в цикле, то бывает необходимо разместить JavaScript в подвале при визуализации компонента только единожды:
 
     @once
         @push('scripts')
             <script>
-                // Your custom JavaScript...
+                // Ваш JavaScript...
             </script>
         @endpush
     @endonce
 
-<a name="building-layouts"></a>
-## Building Layouts
-
-<a name="layouts-using-components"></a>
-### Layouts Using Components
-
-Most web applications maintain the same general layout across various pages. It would be incredibly cumbersome and hard to maintain our application if we had to repeat the entire layout HTML in every view we create. Thankfully, it's convenient to define this layout as a single [Blade component](#components) and then use it throughout our application.
-
-<a name="defining-the-layout-component"></a>
-#### Defining The Layout Component
-
-For example, imagine we are building a "todo" list application. We might define a `layout` component that looks like the following:
-
-```html
-<!-- resources/views/components/layout.blade.php -->
-
-<html>
-    <head>
-        <title>{{ $title ?? 'Todo Manager' }}</title>
-    </head>
-    <body>
-        <h1>Todos</h1>
-        <hr/>
-        {{ $slot }}
-    </body>
-</html>
-```
-
-<a name="applying-the-layout-component"></a>
-#### Applying The Layout Component
-
-Once the `layout` component has been defined, we may create a Blade view that utilizes the component. In this example, we will define a simple view that displays our task list:
-
-```html
-<!-- resources/views/tasks.blade.php -->
-
-<x-layout>
-    @foreach ($tasks as $task)
-        {{ $task }}
-    @endforeach
-</x-layout>
-```
-
-Remember, content that is injected into a component will be supplied to the default `$slot` variable within our `layout` component. As you may have noticed, our `layout` also respects a `$title` slot if one is provided; otherwise, a default title is shown. We may inject a custom title from our task list view using the standard slot syntax discussed in the [component documentation](#components):
-
-```html
-<!-- resources/views/tasks.blade.php -->
-
-<x-layout>
-    <x-slot name="title">
-        Custom Title
-    </x-slot>
-
-    @foreach ($tasks as $task)
-        {{ $task }}
-    @endforeach
-</x-layout>
-```
-
-Now that we have defined our layout and task list views, we just need to return the `task` view from a route:
-
-    use App\Models\Task;
-
-    Route::get('/tasks', function () {
-        return view('tasks', ['tasks' => Task::all()]);
-    });
-
-<a name="layouts-using-template-inheritance"></a>
-### Layouts Using Template Inheritance
-
-<a name="defining-a-layout"></a>
-#### Defining A Layout
-
-Layouts may also be created via "template inheritance". This was the primary way of building applications prior to the introduction of [components](#components).
-
-To get started, let's take a look at a simple example. First, we will examine a page layout. Since most web applications maintain the same general layout across various pages, it's convenient to define this layout as a single Blade view:
-
-```html
-<!-- resources/views/layouts/app.blade.php -->
-
-<html>
-    <head>
-        <title>App Name - @yield('title')</title>
-    </head>
-    <body>
-        @section('sidebar')
-            This is the master sidebar.
-        @show
-
-        <div class="container">
-            @yield('content')
-        </div>
-    </body>
-</html>
-```
-
-As you can see, this file contains typical HTML mark-up. However, take note of the `@section` and `@yield` directives. The `@section` directive, as the name implies, defines a section of content, while the `@yield` directive is used to display the contents of a given section.
-
-Now that we have defined a layout for our application, let's define a child page that inherits the layout.
-
-<a name="extending-a-layout"></a>
-#### Extending A Layout
-
-When defining a child view, use the `@extends` Blade directive to specify which layout the child view should "inherit". Views which extend a Blade layout may inject content into the layout's sections using `@section` directives. Remember, as seen in the example above, the contents of these sections will be displayed in the layout using `@yield`:
-
-```html
-<!-- resources/views/child.blade.php -->
-
-@extends('layouts.app')
-
-@section('title', 'Page Title')
-
-@section('sidebar')
-    @@parent
-
-    <p>This is appended to the master sidebar.</p>
-@endsection
-
-@section('content')
-    <p>This is my body content.</p>
-@endsection
-```
-
-In this example, the `sidebar` section is utilizing the `@@parent` directive to append (rather than overwriting) content to the layout's sidebar. The `@@parent` directive will be replaced by the content of the layout when the view is rendered.
-
-> {tip} Contrary to the previous example, this `sidebar` section ends with `@endsection` instead of `@show`. The `@endsection` directive will only define a section while `@show` will define and **immediately yield** the section.
-
-The `@yield` directive also accepts a default value as its second parameter. This value will be rendered if the section being yielded is undefined:
-
-    @yield('content', 'Default content')
-
-<a name="forms"></a>
-## Forms
-
-<a name="csrf-field"></a>
-### CSRF Field
-
-Anytime you define an HTML form in your application, you should include a hidden CSRF token field in the form so that [the CSRF protection](https://laravel.com/docs/{{version}}/csrf) middleware can validate the request. You may use the `@csrf` Blade directive to generate the token field:
-
-```html
-<form method="POST" action="/profile">
-    @csrf
-
-    ...
-</form>
-```
-
-<a name="method-field"></a>
-### Method Field
-
-Since HTML forms can't make `PUT`, `PATCH`, or `DELETE` requests, you will need to add a hidden `_method` field to spoof these HTTP verbs. The `@method` Blade directive can create this field for you:
-
-```html
-<form action="/foo/bar" method="POST">
-    @method('PUT')
-
-    ...
-</form>
-```
-
-<a name="validation-errors"></a>
-### Validation Errors
-
-The `@error` directive may be used to quickly check if [validation error messages](/docs/{{version}}/validation#quick-displaying-the-validation-errors) exist for a given attribute. Within an `@error` directive, you may echo the `$message` variable to display the error message:
-
-```html
-<!-- /resources/views/post/create.blade.php -->
-
-<label for="title">Post Title</label>
-
-<input id="title" type="text" class="@error('title') is-invalid @enderror">
-
-@error('title')
-    <div class="alert alert-danger">{{ $message }}</div>
-@enderror
-```
-
-You may pass [the name of a specific error bag](/docs/{{version}}/validation#named-error-bags) as the second parameter to the `@error` directive to retrieve validation error messages on pages containing multiple forms:
-
-```html
-<!-- /resources/views/auth.blade.php -->
-
-<label for="email">Email address</label>
-
-<input id="email" type="email" class="@error('email', 'login') is-invalid @enderror">
-
-@error('email', 'login')
-    <div class="alert alert-danger">{{ $message }}</div>
-@enderror
-```
-
 <a name="raw-php"></a>
-### Raw PHP
+### Необработанный PHP
 
-In some situations, it's useful to embed PHP code into your views. You can use the Blade `@php` directive to execute a block of plain PHP within your template:
+В крайних ситуациях можно встроить PHP-код в ваши шаблоны. Вы можете использовать директиву `@php` Blade для размещения блока простого PHP в вашем шаблоне:
 
     @php
         $counter = 1;
     @endphp
 
 <a name="components"></a>
-## Components
+## Компоненты
 
-Components and slots provide similar benefits to sections, layouts, and includes; however, some may find the mental model of components and slots easier to understand. There are two approaches to writing components: class based components and anonymous components.
+Компоненты и слоты предоставляют те же преимущества, что и секции, макеты и включение шаблона из другого шаблона; однако, некоторым может быть легче понять мысленную модель компонентов и слотов. Есть два подхода к написанию компонентов: компоненты на основе классов и анонимные компоненты.
 
-To create a class based component, you may use the `make:component` Artisan command. To illustrate how to use components, we will create a simple `Alert` component. The `make:component` command will place the component in the `App\View\Components` directory:
+Чтобы создать компонент на основе класса, вы можете использовать команду `make:component` [Artisan](artisan). Чтобы проиллюстрировать, как использовать компоненты, мы создадим простой компонент `Alert`. Команда `make:component` поместит компонент в каталог `app/View/Components`:
 
     php artisan make:component Alert
 
-The `make:component` command will also create a view template for the component. The view will be placed in the `resources/views/components` directory. When writing components for your own application, components are automatically discovered within the `app/View/Components` directory and `resources/views/components` directory, so no further component registration is typically required.
+Команда `make: component` также создаст шаблон для компонента. Шаблон будет помещен в каталог `resources/views/components`. При написании компонентов для вашего собственного приложения компоненты автоматически обнаруживаются в каталогах `app/View/Components` и `resources/views/components`, поэтому дополнительная регистрация компонентов обычно не требуется.
 
-You may also create components within subdirectories:
+Вы также можете создавать компоненты в подкаталогах:
 
     php artisan make:component Forms/Input
 
-The command above will create an `Input` component in the `App\View\Components\Forms` directory and the view will be placed in the `resources/views/components/forms` directory.
+Приведенная выше команда создаст компонент `Input` в каталоге `App\View\Components\Forms`, а шаблон будет помещен в каталог `resources/views/components/forms`.
 
 <a name="manually-registering-package-components"></a>
-#### Manually Registering Package Components
+#### Самостоятельная регистрация компонентов пакета
 
-When writing components for your own application, components are automatically discovered within the `app/View/Components` directory and `resources/views/components` directory.
+При написании компонентов для вашего собственного приложения компоненты автоматически обнаруживаются в каталогах `app/View/Components` и `resources/views/components`.
 
-However, if you are building a package that utilizes Blade components, you will need to manually register your component class and its HTML tag alias. You should typically register your components in the `boot` method of your package's service provider:
+Однако, если вы создаете пакет, который использует компоненты Blade, вам необходимо вручную зарегистрировать класс компонента и его псевдоним HTML-тега. Вы должны зарегистрировать свои компоненты в методе `boot` поставщика служб вашего пакета:
 
     use Illuminate\Support\Facades\Blade;
 
     /**
-     * Bootstrap your package's services.
+     * Загрузка любых служб пакета.
      */
     public function boot()
     {
         Blade::component('package-alert', Alert::class);
     }
 
-Once your component has been registered, it may be rendered using its tag alias:
+После того, как ваш компонент был зарегистрирован, он может быть отображен с использованием псевдонима тега:
 
     <x-package-alert/>
 
-Alternatively, you may use the `componentNamespace` method to autoload component classes by convention. For example, a `Nightshade` package might have `Calendar` and `ColorPicker` components that reside within the `Package\Views\Components` namespace:
+Как вариант, вы можете использовать метод `componentNamespace` для автоматической загрузки классов компонентов по соглашению. Например, пакет `Nightshade` может иметь компоненты `Calendar` и `ColorPicker`, которые находятся в пространстве имен `Package\Views\Components`:
 
     use Illuminate\Support\Facades\Blade;
 
     /**
-     * Bootstrap your package's services.
+     * Загрузка любых служб пакета.
      *
      * @return void
      */
@@ -683,34 +493,34 @@ Alternatively, you may use the `componentNamespace` method to autoload component
         Blade::componentNamespace('Nightshade\\Views\\Components', 'nightshade');
     }
 
-This will allow the usage of package components by their vendor namespace using the `package-name::` syntax:
+Это позволит использовать компоненты пакета в пространстве имен их поставщиков, используя синтаксис `x-package-name::`:
 
     <x-nightshade::calendar />
     <x-nightshade::color-picker />
 
-Blade will automatically detect the class that's linked to this component by pascal-casing the component name. Subdirectories are also supported using "dot" notation.
+Blade автоматически обнаружит класс, связанный с этим компонентом, используя «верблюжий регистр» имени компонента. Подкаталоги также поддерживаются с использованием «точечной» нотации.
 
 <a name="rendering-components"></a>
-### Rendering Components
+### Отрисовка компонентов
 
-To display a component, you may use a Blade component tag within one of your Blade templates. Blade component tags start with the string `x-` followed by the kebab case name of the component class:
+Для отображения компонента вы можете использовать тег компонента Blade в одном из ваших шаблонов Blade. Теги компонентов Blade начинаются со строки `x-`, за которой следует имя в «шашлычном регистре» класса компонента:
 
     <x-alert/>
 
     <x-user-profile/>
 
-If the component class is nested deeper within the `App\View\Components` directory, you may use the `.` character to indicate directory nesting. For example, if we assume a component is located at `App\View\Components\Inputs\Button.php`, we may render it like so:
+Если класс компонента имеет вложенность в каталоге `app/View/Components`, то вы можете использовать символ `.` для обозначения вложенности каталогов. Например, если мы предполагаем, что компонент находится в `App\View\Components\Inputs\Button.php`, то мы можем отобразить его так:
 
     <x-inputs.button/>
 
 <a name="passing-data-to-components"></a>
-### Passing Data To Components
+### Передача данных компонентам
 
-You may pass data to Blade components using HTML attributes. Hard-coded, primitive values may be passed to the component using simple HTML attribute strings. PHP expressions and variables should be passed to the component via attributes that use the `:` character as a prefix:
+Вы можете передавать данные в компоненты Blade, используя атрибуты HTML. Жестко запрограммированные примитивные значения могут быть переданы компоненту с помощью простых строк атрибутов HTML. Выражения и переменные PHP следует передавать компоненту через атрибуты, которые используют символ `:` в качестве префикса:
 
     <x-alert type="error" :message="$message"/>
 
-You should define the component's required data in its class constructor. All public properties on a component will automatically be made available to the component's view. It is not necessary to pass the data to the view from the component's `render` method:
+Вы должны определить необходимые данные компонента в его конструкторе класса. Все общедоступные свойства компонента будут автоматически доступны в шаблоне компонента. Нет необходимости передавать данные в шаблон из метода `render` компонента:
 
     <?php
 
@@ -721,21 +531,21 @@ You should define the component's required data in its class constructor. All pu
     class Alert extends Component
     {
         /**
-         * The alert type.
+         * Тип предупреждения.
          *
          * @var string
          */
         public $type;
 
         /**
-         * The alert message.
+         * Предупреждающее сообщение.
          *
          * @var string
          */
         public $message;
 
         /**
-         * Create the component instance.
+         * Создать экземпляр компонента.
          *
          * @param  string  $type
          * @param  string  $message
@@ -748,7 +558,7 @@ You should define the component's required data in its class constructor. All pu
         }
 
         /**
-         * Get the view / contents that represent the component.
+         * Получить шаблон / содержимое, представляющее компонент.
          *
          * @return \Illuminate\View\View|\Closure|string
          */
@@ -758,7 +568,7 @@ You should define the component's required data in its class constructor. All pu
         }
     }
 
-When your component is rendered, you may display the contents of your component's public variables by echoing the variables by name:
+Когда ваш компонент визуализируется, вы можете отображать содержимое общедоступных переменных вашего компонента, выводя переменные по имени:
 
 ```html
 <div class="alert alert-{{ $type }}">
@@ -767,12 +577,12 @@ When your component is rendered, you may display the contents of your component'
 ```
 
 <a name="casing"></a>
-#### Casing
+#### Именование
 
-Component constructor arguments should be specified using `camelCase`, while `kebab-case` should be used when referencing the argument names in your HTML attributes. For example, given the following component constructor:
+Аргументы конструктора компонентов следует указывать с помощью `camelCase`, а при обращении к именам аргументов в ваших атрибутах HTML следует использовать `kebab-case`. Например, учитывая следующий конструктор компонента:
 
     /**
-     * Create the component instance.
+     * Создать экземпляр компонента.
      *
      * @param  string  $alertType
      * @return void
@@ -782,32 +592,32 @@ Component constructor arguments should be specified using `camelCase`, while `ke
         $this->alertType = $alertType;
     }
 
-The `$alertType` argument may be provided to the component like so:
+Аргумент `$alertType` может быть передан компоненту следующим образом:
 
     <x-alert alert-type="danger" />
 
 <a name="escaping-attribute-rendering"></a>
-#### Escaping Attribute Rendering
+#### Экранирование атрибутов от синтаксического анализа
 
-Since some JavaScript frameworks such as Alpine.js also use colon-prefixed attributes, you may use a double colon (`::`) prefix to inform Blade that the attribute is not a PHP expression. For example, given the following component:
+Поскольку некоторые фреймворки JavaScript, такие как Alpine.js, также используют атрибуты с префиксом двоеточия, вы можете использовать префикс с двойным двоеточием (`::`), чтобы сообщить Blade, что атрибут не является выражением PHP. Например, учитывая следующий компонент:
 
     <x-button ::class="{ danger: isDeleting }">
         Submit
     </x-button>
 
-The following HTML will be rendered by Blade:
+Blade отобразит следующий HTML-код:
 
     <button :class="{ danger: isDeleting }">
         Submit
     </button>
 
 <a name="component-methods"></a>
-#### Component Methods
+#### Методы компонента
 
-In addition to public variables being available to your component template, any public methods on the component may be invoked. For example, imagine a component that has an `isSelected` method:
+В дополнение к общедоступным переменным, доступным для вашего шаблона компонента, могут быть вызваны любые общедоступные методы компонента. Например, представьте компонент, у которого есть метод `isSelected`:
 
     /**
-     * Determine if the given option is the currently selected option.
+     * Определить, является ли переданная опция выбранной.
      *
      * @param  string  $option
      * @return bool
@@ -817,19 +627,19 @@ In addition to public variables being available to your component template, any 
         return $option === $this->selected;
     }
 
-You may execute this method from your component template by invoking the variable matching the name of the method:
+Вы можете выполнить этот метод из своего шаблона компонента, вызвав переменную, соответствующую имени метода:
 
     <option {{ $isSelected($value) ? 'selected="selected"' : '' }} value="{{ $value }}">
         {{ $label }}
     </option>
 
 <a name="using-attributes-slots-within-component-class"></a>
-#### Accessing Attributes & Slots Within Component Classes
+#### Доступ к атрибутам и слотам в классах компонентов
 
-Blade components also allow you to access the component name, attributes, and slot inside the class's render method. However, in order to access this data, you should return a closure from your component's `render` method. The closure will receive a `$data` array as its only argument. This array will contain several elements that provide information about the component:
+Компоненты Blade также позволяют получить доступ к имени компонента, атрибутам и слоту внутри метода `render` класса. Однако, чтобы получить доступ к этим данным, вы должны вернуть замыкание из метода `render` вашего компонента. Замыкание получит массив `$data` в качестве единственного аргумента. Этот массив будет содержать несколько элементов, предоставляющих информацию о компоненте:
 
     /**
-     * Get the view / contents that represent the component.
+     * Получить шаблон / содержимое, представляющее компонент.
      *
      * @return \Illuminate\View\View|\Closure|string
      */
@@ -844,19 +654,19 @@ Blade components also allow you to access the component name, attributes, and sl
         };
     }
 
-The `componentName` is equal to the name used in the HTML tag after the `x-` prefix. So `<x-alert />`'s `componentName` will be `alert`. The `attributes` element will contain all of the attributes that were present on the HTML tag. The `slot` element is an `Illuminate\Support\HtmlString` instance with the contents of the component's slot.
+`componentName` эквивалентно имени, используемому в HTML-теге после префикса `x-`. Таким образом, `componentName` компонента `<x-alert />` будет `alert`. Элемент `attributes` будет содержать все атрибуты, которые присутствовали в HTML-теге. Элемент `slot` – это экземпляр `Illuminate\Support\HtmlString` с содержимым слота компонента.
 
-The closure should return a string. If the returned string corresponds to an existing view, that view will be rendered; otherwise, the returned string will be evaluated as an inline Blade view.
+Замыкание должно возвращать строку. Если возвращенная строка соответствует существующему шаблону, то этот шаблон будет отрисован; в противном случае возвращенная строка будет оцениваться как встроенный шаблон Blade.
 
 <a name="additional-dependencies"></a>
-#### Additional Dependencies
+#### Дополнительные зависимости
 
-If your component requires dependencies from Laravel's [service container](/docs/{{version}}/container), you may list them before any of the component's data attributes and they will automatically be injected by the container:
+Если вашему компоненту требуются зависимости из [контейнера служб](container) Laravel, то вы можете указать их перед любыми атрибутами данных компонента, и они будут автоматически внедрены контейнером:
 
     use App\Services\AlertCreator
 
     /**
-     * Create the component instance.
+     * Создать экземпляр компонента.
      *
      * @param  \App\Services\AlertCreator  $creator
      * @param  string  $type
@@ -870,35 +680,63 @@ If your component requires dependencies from Laravel's [service container](/docs
         $this->message = $message;
     }
 
-<a name="component-attributes"></a>
-### Component Attributes
+<a name="hiding-attributes-and-methods"></a>
+#### Скрытие атрибутов / методов
 
-We've already examined how to pass data attributes to a component; however, sometimes you may need to specify additional HTML attributes, such as `class`, that are not part of the data required for a component to function. Typically, you want to pass these additional attributes down to the root element of the component template. For example, imagine we want to render an `alert` component like so:
+Если вы хотите, чтобы некоторые публичные методы или свойства не использовались как переменные в шаблоне компонента, вы можете добавить их в свойство массива `$except` в вашем компоненте:
+
+    <?php
+
+    namespace App\View\Components;
+
+    use Illuminate\View\Component;
+
+    class Alert extends Component
+    {
+        /**
+         * Тип предупреждения.
+         *
+         * @var string
+         */
+        public $type;
+
+        /**
+         * Свойства / методы, которые не должны использоваться в шаблоне компонента.
+         *
+         * @var array
+         */
+        protected $except = ['type'];
+    }
+
+<a name="component-attributes"></a>
+### Атрибуты компонента
+
+Мы уже рассмотрели, как передавать атрибуты данных в компонент; иногда требуется указать дополнительные атрибуты HTML, такие как `class`, которые не являются частью данных, необходимых для функционирования компонента. Как правило, вы хотите передать эти дополнительные атрибуты корневому элементу шаблона компонента. Например, представьте, что мы хотим отобразить компонент `alert` следующим образом:
 
     <x-alert type="error" :message="$message" class="mt-4"/>
 
-All of the attributes that are not part of the component's constructor will automatically be added to the component's "attribute bag". This attribute bag is automatically made available to the component via the `$attributes` variable. All of the attributes may be rendered within the component by echoing this variable:
+Все атрибуты, которые не являются частью конструктора компонента, будут автоматически добавлены в «коллекцию атрибутов» компонента. Эта коллекция атрибутов автоматически становится доступной для компонента через переменную `$attributes`. Все атрибуты могут отображаться в компоненте путем вывода этой переменной:
 
     <div {{ $attributes }}>
         <!-- Component content -->
     </div>
 
-> {note} Using directives such as `@env` within component tags is not supported at this time. For example, `<x-alert :live="@env('production')"/>` will not be compiled.
+> {note} Использование таких директив, как `@env` в тегах компонентов в настоящее время не поддерживается. Например, `<x-alert :live="@env('production')"/>` не будет компилироваться.
 
 <a name="default-merged-attributes"></a>
-#### Default / Merged Attributes
+#### Атрибуты по умолчанию и слияние атрибутов
 
-Sometimes you may need to specify default values for attributes or merge additional values into some of the component's attributes. To accomplish this, you may use the attribute bag's `merge` method. This method is particularly useful for defining a set of default CSS classes that should always be applied to a component:
+Иногда требуется указать значения по умолчанию для атрибутов или добавить дополнительные значения в некоторые атрибуты компонента. Для этого вы можете использовать метод `merge` коллекции атрибутов. Этот метод особенно полезен для определения набора CSS-классов по умолчанию, которые всегда должны применяться к компоненту:
 
     <div {{ $attributes->merge(['class' => 'alert alert-'.$type]) }}>
         {{ $message }}
     </div>
 
-If we assume this component is utilized like so:
+Если предположить,
 
     <x-alert type="error" :message="$message" class="mb-4"/>
 
-The final, rendered HTML of the component will appear like the following:
+Окончательный обработанный HTML-код компонента будет выглядеть следующим образом:
 
 ```html
 <div class="alert alert-error mb-4">
@@ -906,62 +744,92 @@ The final, rendered HTML of the component will appear like the following:
 </div>
 ```
 
-<a name="non-class-attribute-merging"></a>
-#### Non-Class Attribute Merging
+<a name="conditionally-merge-classes"></a>
+#### Условное слияние классов
 
-When merging attributes that are not `class` attributes, the values provided to the `merge` method will be considered the "default" values of the attribute. However, unlike the `class` attribute, these attributes will not be merged with injected attribute values. Instead, they will be overwritten. For example, a `button` component's implementation may look like the following:
+По желанию можно объединить классы, если указанное условие истинно. Вы можете сделать это с помощью метода `class`, который принимает массив классов, где ключ массива содержит класс или классы, которые вы хотите добавить, а значение является логическим выражением. Если элемент массива имеет числовой ключ, то он всегда будет добавлен в конечный список классов:
+
+    <div {{ $attributes->class(['p-4', 'bg-red' => $hasError]) }}>
+        {{ $message }}
+    </div>
+
+Если вам нужно объединить другие атрибуты в свой компонент, вы можете связать метод `merge` с методом `class`:
+
+    <button {{ $attributes->class(['p-4'])->merge(['type' => 'button']) }}>
+        {{ $slot }}
+    </button>
+
+<a name="non-class-attribute-merging"></a>
+#### Слияние неклассовых атрибутов
+
+При слиянии атрибутов, которые не являются атрибутами класса, значения, предоставленные методу `merge`, будут считаться значениями атрибута по умолчанию. Однако, в отличие от атрибута `class`, эти атрибуты не будут объединены с указанными значениями атрибутов. Вместо этого они будут перезаписаны. Например, реализация компонента `button` может выглядеть следующим образом:
 
     <button {{ $attributes->merge(['type' => 'button']) }}>
         {{ $slot }}
     </button>
 
-To render the button component with a custom `type`, it may be specified when consuming the component. If no type is specified, the `button` type will be used:
+Чтобы отобразить компонент кнопки с настраиваемым `type`, его можно указать при использовании компонента. Если тип не указан, будет использоваться тип `button`, определенный по умолчанию:
 
     <x-button type="submit">
         Submit
     </x-button>
 
-The rendered HTML of the `button` component in this example would be:
+Обработанный HTML-код компонента `button` в этом примере будет:
 
     <button type="submit">
         Submit
     </button>
 
-If you would like an attribute other than `class` to have its default value and injected values joined together, you may use the `prepends` method. In this example, the `data-controller` attribute will always begin with `profile-controller` and any additional injected `data-controller` values will be placed after this default value:
+Если вы хотите, чтобы атрибут, отличный от `class`, имел значение по умолчанию и указанное значение, объединенные вместе, вы можете использовать метод `prepends`. В этом примере атрибут `data-controller` всегда будет начинаться с `profile-controller`, а любые дополнительные указанные значения `data-controller` будут помещены после этого значения по умолчанию:
 
     <div {{ $attributes->merge(['data-controller' => $attributes->prepends('profile-controller')]) }}>
         {{ $slot }}
     </div>
 
 <a name="filtering-attributes"></a>
-#### Retrieving & Filtering Attributes
+#### Получение и фильтрация атрибутов
 
-You may filter attributes using the `filter` method. This method accepts a closure which should return `true` if you wish to retain the attribute in the attribute bag:
+Вы можете фильтровать атрибуты, используя метод `filter`. Этот метод принимает замыкание, которое должно возвращать `true`, если вы хотите сохранить атрибут в коллекции атрибутов:
 
     {{ $attributes->filter(fn ($value, $key) => $key == 'foo') }}
 
-For convenience, you may use the `whereStartsWith` method to retrieve all attributes whose keys begin with a given string:
+Для удобства вы можете использовать метод `whereStartsWith` для получения всех атрибутов, ключи которых начинаются с указанной строки:
 
     {{ $attributes->whereStartsWith('wire:model') }}
 
-Using the `first` method, you may render the first attribute in a given attribute bag:
+Используя метод `first`, вы можете отобразить первый атрибут в указанной коллекции атрибутов:
 
     {{ $attributes->whereStartsWith('wire:model')->first() }}
 
-If you would like to check if an attribute is present on the component, you may use the `has` method. This method accepts the attribute name as its only argument and returns a boolean indicating whether or not the attribute is present:
+Если вы хотите проверить, присутствует ли атрибут в компоненте, вы можете использовать метод `has`. Этот метод принимает имя атрибута в качестве единственного аргумента и возвращает логическое значение, указывающее, присутствует ли атрибут:
 
     @if ($attributes->has('class'))
         <div>Class attribute is present</div>
     @endif
 
-You may retrieve a specific attribute's value using the `get` method:
+Вы можете получить значение конкретного атрибута, используя метод `get`:
 
     {{ $attributes->get('class') }}
 
-<a name="slots"></a>
-### Slots
+<a name="reserved-keywords"></a>
+### Зарезервированные ключевые слова
 
-You will often need to pass additional content to your component via "slots". Component slots are rendered by echoing the `$slot` variable. To explore this concept, let's imagine that an `alert` component has the following markup:
+По умолчанию некоторые ключевые слова зарезервированы для внутреннего использования Blade при визуализации компонентов. Следующие ключевые слова не могут быть определены как публичные свойства или имена методов в ваших компонентах:
+
+<!-- <div class="content-list" markdown="1"> -->
+- `data`
+- `render`
+- `resolveView`
+- `shouldRender`
+- `view`
+- `withAttributes`
+- `withName`
+<!-- </div> -->
+
+<a name="slots"></a>
+### Слоты
+
+Вам часто потребуется передавать дополнительный контент вашему компоненту через «слоты». Слоты компонентов отображаются путем вывода переменной `$slot`. Чтобы изучить эту концепцию, представим, что компонент `alert` имеет следующую разметку:
 
 ```html
 <!-- /resources/views/components/alert.blade.php -->
@@ -971,7 +839,7 @@ You will often need to pass additional content to your component via "slots". Co
 </div>
 ```
 
-We may pass content to the `slot` by injecting content into the component:
+Мы можем передавать контент в `slot`, вставив контент в компонент:
 
 ```html
 <x-alert>
@@ -979,7 +847,7 @@ We may pass content to the `slot` by injecting content into the component:
 </x-alert>
 ```
 
-Sometimes a component may need to render multiple different slots in different locations within the component. Let's modify our alert component to allow for the injection of a "title" slot:
+Иногда компоненту может потребоваться отрисовать несколько разных слотов в разных местах внутри компонента. Давайте модифицируем наш компонент оповещения, чтобы учесть вставку слота `title`:
 
 ```html
 <!-- /resources/views/components/alert.blade.php -->
@@ -991,7 +859,7 @@ Sometimes a component may need to render multiple different slots in different l
 </div>
 ```
 
-You may define the content of the named slot using the `x-slot` tag. Any content not within an explicit `x-slot` tag will be passed to the component in the `$slot` variable:
+Вы можете определить содержимое именованнго слота с помощью тега `x-slot`. Любой контент, не указанный в явном теге `x-slot`, будет передан компоненту в переменной `$slot`:
 
 ```html
 <x-alert>
@@ -1004,9 +872,9 @@ You may define the content of the named slot using the `x-slot` tag. Any content
 ```
 
 <a name="scoped-slots"></a>
-#### Scoped Slots
+#### Слоты с ограниченной областью видимости
 
-If you have used a JavaScript framework such as Vue, you may be familiar with "scoped slots", which allow you to access data or methods from the component within your slot. You may achieve similar behavior in Laravel by defining public methods or properties on your component and accessing the component within your slot via the `$component` variable. In this example, we will assume that the `x-alert` component has a public `formatAlert` method defined on its component class:
+Если вы использовали фреймворк JavaScript, такой как Vue, то вы, возможно, знакомы со «слотами с ограниченной областью видимости», которые позволяют получать доступ к данным или методам из компонента в вашем слоте. Вы можете добиться аналогичного поведения в Laravel, определив общедоступные методы или свойства в вашем компоненте и получив доступ к компоненту в вашем слоте через переменную `$component`. В этом примере мы предположим, что компонент `x-alert` имеет общедоступный метод `formatAlert`, определенный в его классе компонента:
 
 ```html
 <x-alert>
@@ -1019,12 +887,12 @@ If you have used a JavaScript framework such as Vue, you may be familiar with "s
 ```
 
 <a name="inline-component-views"></a>
-### Inline Component Views
+### Встроенные шаблоны компонентов
 
-For very small components, it may feel cumbersome to manage both the component class and the component's view template. For this reason, you may return the component's markup directly from the `render` method:
+Для очень маленьких компонентов может показаться обременительным управлять как классом компонента, так и шаблоном компонента. По этой причине вы можете вернуть разметку компонента прямо из метода `render`:
 
     /**
-     * Get the view / contents that represent the component.
+     * Получить шаблон / содержимое, представляющее компонент.
      *
      * @return \Illuminate\View\View|\Closure|string
      */
@@ -1038,29 +906,29 @@ For very small components, it may feel cumbersome to manage both the component c
     }
 
 <a name="generating-inline-view-components"></a>
-#### Generating Inline View Components
+#### Генерация компонентов со встроенными шаблонами
 
-To create a component that renders an inline view, you may use the `inline` option when executing the `make:component` command:
+Чтобы создать компонент, который использует встроенный шаблон, вы можете использовать параметр `--inline` при выполнении команды `make:component`:
 
     php artisan make:component Alert --inline
 
 <a name="anonymous-components"></a>
-### Anonymous Components
+### Анонимные компоненты
 
-Similar to inline components, anonymous components provide a mechanism for managing a component via a single file. However, anonymous components utilize a single view file and have no associated class. To define an anonymous component, you only need to place a Blade template within your `resources/views/components` directory. For example, assuming you have defined a component at `resources/views/components/alert.blade.php`, you may simply render it like so:
+Подобно встроенным компонентам, анонимные компоненты предоставляют механизм для управления компонентом через один файл. Однако анонимные компоненты используют один файл шаблона, но не имеют связанного с компонентом класса. Чтобы определить анонимный компонент, вам нужно только разместить шаблон Blade в вашем каталоге `resources/views/components`. Например, если вы определили компонент в `resources/views/components/alert.blade.php`, вы можете просто отобразить его так:
 
     <x-alert/>
 
-You may use the `.` character to indicate if a component is nested deeper inside the `components` directory. For example, assuming the component is defined at `resources/views/components/inputs/button.blade.php`, you may render it like so:
+Вы можете использовать символ `.`, чтобы указать, вложен ли компонент в каталоге `components`. Например, если компонент определен в `resources/views/components/inputs/button.blade.php`, вы можете отобразить его так:
 
     <x-inputs.button/>
 
 <a name="data-properties-attributes"></a>
-#### Data Properties / Attributes
+#### Свойства / атрибуты данных
 
-Since anonymous components do not have any associated class, you may wonder how you may differentiate which data should be passed to the component as variables and which attributes should be placed in the component's [attribute bag](#component-attributes).
+Поскольку анонимные компоненты не имеют ассоциированного класса, вы можете задаться вопросом, как можно различить, какие данные должны быть переданы компоненту как переменные, а какие атрибуты должны быть помещены в [коллекцию атрибутов](#component-attributes) компонента.
 
-You may specify which attributes should be considered data variables using the `@props` directive at the top of your component's Blade template. All other attributes on the component will be available via the component's attribute bag. If you wish to give a data variable a default value, you may specify the variable's name as the array key and the default value as the array value:
+Вы можете указать, какие атрибуты следует рассматривать как переменные данных, используя директиву `@props` в верхней части шаблона Blade вашего компонента. Все остальные атрибуты компонента будут доступны через коллекцию атрибутов компонента. Если вы хотите присвоить переменной данных значение по умолчанию, вы можете указать имя переменной в качестве ключа массива и значение по умолчанию в качестве значения массива:
 
     <!-- /resources/views/components/alert.blade.php -->
 
@@ -1070,31 +938,31 @@ You may specify which attributes should be considered data variables using the `
         {{ $message }}
     </div>
 
-Given the component definition above, we may render the component like so:
+Учитывая приведенное выше определение компонента, мы можем отобразить компонент следующим образом:
 
     <x-alert type="error" :message="$message" class="mb-4"/>
 
 <a name="dynamic-components"></a>
-### Dynamic Components
+### Динамические компоненты
 
-Sometimes you may need to render a component but not know which component should be rendered until runtime. In this situation, you may use Laravel's built-in `dynamic-component` component to render the component based on a runtime value or variable:
+Иногда требуется визуализировать компонент, но вы не знаете, какой компонент следует визуализировать до времени выполнения. В этой ситуации вы можете использовать встроенный в Laravel компонент `dynamic-component` для отображения компонента на основе значения или переменной, полученной во время выполнения запроса:
 
     <x-dynamic-component :component="$componentName" class="mt-4" />
 
 <a name="manually-registering-components"></a>
-### Manually Registering Components
+### Самостоятельная регистрация компонентов
 
-> {note} The following documentation on manually registering components is primarily applicable to those who are writing Laravel packages that include view components. If you are not writing a package, this portion of the component documentation may not be relevant to you.
+> {note} Следующая документация по самостоятельной регистрации компонентов в первую очередь полезна тем, кто пишет пакеты Laravel, которые включают компоненты. Если вы не пишете пакет, эта часть документации компонента может быть вам не нужна.
 
-When writing components for your own application, components are automatically discovered within the `app/View/Components` directory and `resources/views/components` directory.
+При написании компонентов для вашего собственного приложения компоненты автоматически обнаруживаются в каталогах `app/View/Components` и `resources/views/components`.
 
-However, if you are building a package that utilizes Blade components or placing components in non-conventional directories, you will need to manually register your component class and its HTML tag alias so that Laravel knows where to find the component. You should typically register your components in the `boot` method of your package's service provider:
+Однако, если вы создаете пакет, который использует компоненты Blade или размещаете компоненты в других каталогах, вам необходимо самостоятельно зарегистрировать класс компонента и его псевдоним HTML-тега, чтобы Laravel знал, где найти компонент. Вы должны зарегистрировать свои компоненты в методе `boot` поставщика служб вашего пакета:
 
     use Illuminate\Support\Facades\Blade;
     use VendorPackage\View\Components\AlertComponent;
 
     /**
-     * Bootstrap your package's services.
+     * Загрузка любых служб пакета.
      *
      * @return void
      */
@@ -1103,18 +971,18 @@ However, if you are building a package that utilizes Blade components or placing
         Blade::component('package-alert', AlertComponent::class);
     }
 
-Once your component has been registered, it may be rendered using its tag alias:
+После того, как ваш компонент был зарегистрирован, он может быть отображен с использованием псевдонима тега:
 
     <x-package-alert/>
 
-#### Autoloading Package Components
+#### Автозагрузка компонентов пакета
 
-Alternatively, you may use the `componentNamespace` method to autoload component classes by convention. For example, a `Nightshade` package might have `Calendar` and `ColorPicker` components that reside within the `Package\Views\Components` namespace:
+Как вариант, вы можете использовать метод `componentNamespace` для автоматической загрузки классов компонентов по соглашению. Например, пакет `Nightshade` может иметь компоненты `Calendar` и `ColorPicker`, которые находятся в пространстве имен `Package\Views\Components`:
 
     use Illuminate\Support\Facades\Blade;
 
     /**
-     * Bootstrap your package's services.
+     * Загрузка любых служб пакета.
      *
      * @return void
      */
@@ -1123,17 +991,208 @@ Alternatively, you may use the `componentNamespace` method to autoload component
         Blade::componentNamespace('Nightshade\\Views\\Components', 'nightshade');
     }
 
-This will allow the usage of package components by their vendor namespace using the `package-name::` syntax:
+Это позволит использовать компоненты пакета в пространстве имен их поставщиков, используя синтаксис `x-package-name::`:
 
     <x-nightshade::calendar />
     <x-nightshade::color-picker />
 
-Blade will automatically detect the class that's linked to this component by pascal-casing the component name. Subdirectories are also supported using "dot" notation.
+Blade автоматически обнаружит класс, связанный с этим компонентом, используя «верблюжий регистр» имени компонента. Подкаталоги также поддерживаются с использованием «точечной» нотации.
+
+<a name="building-layouts"></a>
+## Создание макетов
+
+<a name="layouts-using-components"></a>
+### Макеты с использованием компонентов
+
+Большинство веб-приложений поддерживают одинаковый общий макет на разных страницах. Было бы невероятно громоздко и сложно поддерживать наше приложение, если бы нам приходилось повторять весь HTML-макет в каждом создаваемом экране. К счастью, этот макет удобно определить как один [компонент Blade](#components), а затем использовать его во всем приложении.
+
+<a name="defining-the-layout-component"></a>
+#### Определение компонента макета
+
+Например, представьте, что мы создаем приложение со списком задач. Мы могли бы определить компонент `layout`, который выглядит следующим образом:
+
+```html
+<!-- resources/views/components/layout.blade.php -->
+
+<html>
+<head>
+    <title>{{ $title ?? 'Todo Manager' }}</title>
+</head>
+<body>
+    <h1>Todos</h1>
+    <hr/>
+    {{ $slot }}
+</body>
+</html>
+```
+
+<a name="applying-the-layout-component"></a>
+#### Использование компонента макета
+
+Как только компонент `layout` определен, мы можем создать шаблон Blade, который будет использовать этот компонент. В этом примере мы определим простой шаблон, который отображает наш список задач:
+
+```html
+<!-- resources/views/tasks.blade.php -->
+
+<x-layout>
+@foreach ($tasks as $task)
+    {{ $task }}
+@endforeach
+</x-layout>
+```
+
+Помните, что содержимое, внедренное в компонент, по умолчанию будет передано переменной `$slot` компонента `layout`. Как вы могли заметить, наш `layout` также учитывает слот `$title`, если он предусмотрен; в противном случае отображается заголовок по умолчанию. Мы можем добавить другой заголовок из нашего шаблона списка задач, используя стандартный синтаксис слотов, описанный в [документации по компонентам](#components):
+
+```html
+<!-- resources/views/tasks.blade.php -->
+
+<x-layout>
+<x-slot name="title">
+    Custom Title
+</x-slot>
+
+@foreach ($tasks as $task)
+    {{ $task }}
+@endforeach
+</x-layout>
+```
+
+Теперь, когда мы определили наш макет и шаблоны списка задач, нам просто нужно вернуть представление `task` из маршрута:
+
+use App\Models\Task;
+
+Route::get('/tasks', function () {
+    return view('tasks', ['tasks' => Task::all()]);
+});
+
+<a name="layouts-using-template-inheritance"></a>
+### Макеты с использованием наследования шаблонов
+
+<a name="defining-a-layout"></a>
+#### Определение макета
+
+Макеты также могут быть созданы с помощью «наследования шаблонов». Это был основной способ создания приложений до появления [компонентов](#components).
+
+Для начала рассмотрим простой пример. Сначала мы изучим макет страницы. Поскольку большинство веб-приложений поддерживают одинаковый общий макет на разных страницах, удобно определить этот макет как единый шаблон Blade:
+
+```html
+<!-- resources/views/layouts/app.blade.php -->
+
+<html>
+<head>
+    <title>App Name - @yield('title')</title>
+</head>
+<body>
+    @section('sidebar')
+        This is the master sidebar.
+    @show
+
+    <div class="container">
+        @yield('content')
+    </div>
+</body>
+</html>
+```
+
+Как видите, этот файл содержит типичную разметку HTML. Однако, обратите внимание на директивы `@section` и `@yield`. Директива `@ section`, как следует из названия, определяет секцию содержимого, тогда как директива `@yield` используется для отображения содержимого секции, предоставленного дочерним шаблоном.
+
+Теперь, когда мы определили макет для нашего приложения, давайте определим дочернюю страницу, которая наследует макет.
+
+<a name="extending-a-layout"></a>
+#### Расширение макета
+
+При определении дочернего шаблона используйте директиву Blade `@extends`, чтобы указать, какой макет дочерний шаблон должен «наследовать». Шаблоны, расширяющие макет Blade, могут добавлять содержимое в секции макета с помощью директив `@section`. Помните, как видно из приведенного выше примера, содержимое этих секций будет отображаться в макете с помощью `@yield`:
+
+```html
+<!-- resources/views/child.blade.php -->
+
+@extends('layouts.app')
+
+@section('title', 'Page Title')
+
+@section('sidebar')
+@@parent
+
+<p>This is appended to the master sidebar.</p>
+@endsection
+
+@section('content')
+<p>This is my body content.</p>
+@endsection
+```
+
+В этом примере секция `sidebar` использует директиву `@@parent` для добавления (а не перезаписи) содержимого к боковой панели макета. Директива `@@parent` будет заменена содержимым макета при визуализации представления.
+
+> {tip} В отличие от предыдущего примера, нынешняя секция `sidebar` заканчивается `@endsection` вместо `@show`. Директива `@endsection` будет только определять секцию, в то время как `@show` будет определять и **немедленно дополнять** секцию.
+
+Директива `@yield` также принимает значение по умолчанию в качестве второго параметра. Это значение будет отображено, если дополняемый раздел не определен:
+
+@yield('content', 'Default content')
+
+<a name="forms"></a>
+## Формы
+
+<a name="csrf-field"></a>
+### Поле CSRF
+
+Каждый раз, когда вы определяете HTML-форму в своем приложении, вы должны включать в форму скрытое поле токена CSRF, чтобы посредник [защиты от CSRF](https://laravel.comcsrf) мог провалидировать запрос. Вы можете использовать директиву `@csrf` Blade для генерации поля токена:
+
+```html
+<form method="POST" action="/profile">
+@csrf
+
+...
+</form>
+```
+
+<a name="method-field"></a>
+### Поле Method
+
+Поскольку HTML-формы не могут выполнять запросы `PUT`, `PATCH` или `DELETE`, вам нужно будет добавить скрытое поле `_method`, чтобы подменить эти HTTP-методы. Директива `@method` Blade поможет создать для вас такое поле:
+
+```html
+<form action="/foo/bar" method="POST">
+@method('PUT')
+
+...
+</form>
+```
+
+<a name="validation-errors"></a>
+### Ошибки валидации
+
+Директива `@error` используется для быстрой проверки наличия [сообщений об ошибках валидации](validation.md#quick-displaying-the-validation-errors) для конкретного атрибута. В директиве `@error` вы можете вывести содержимое переменной `$message` для отображения сообщения об ошибке:
+
+```html
+<!-- /resources/views/post/create.blade.php -->
+
+<label for="title">Post Title</label>
+
+<input id="title" type="text" class="@error('title') is-invalid @enderror">
+
+@error('title')
+<div class="alert alert-danger">{{ $message }}</div>
+@enderror
+```
+
+Вы можете передать [имя конкретной коллекции ошибок](validation.md#named-error-bags) в качестве второго параметра директивы `@error` для получения сообщений об ошибках валидации на страницах, содержащих несколько форм:
+
+```html
+<!-- /resources/views/auth.blade.php -->
+
+<label for="email">Email address</label>
+
+<input id="email" type="email" class="@error('email', 'login') is-invalid @enderror">
+
+@error('email', 'login')
+<div class="alert alert-danger">{{ $message }}</div>
+@enderror
+```
 
 <a name="stacks"></a>
-## Stacks
+## Стеки
 
-Blade allows you to push to named stacks which can be rendered somewhere else in another view or layout. This can be particularly useful for specifying any JavaScript libraries required by your child views:
+Blade позволяет вам добавлять содержимое к именованным стекам, которые можно отобразить где-нибудь еще в другом шаблоне или макете. Это может быть особенно полезно для указания любых библиотек JavaScript, необходимых для ваших дочерних шаблонов:
 
 ```html
 @push('scripts')
@@ -1141,7 +1200,7 @@ Blade allows you to push to named stacks which can be rendered somewhere else in
 @endpush
 ```
 
-You may push to a stack as many times as needed. To render the complete stack contents, pass the name of the stack to the `@stack` directive:
+Вы можете помещать в стек сколько угодно раз. Чтобы отобразить полное содержимое стека, передайте имя стека в директиву `@stack`:
 
 ```html
 <head>
@@ -1151,7 +1210,7 @@ You may push to a stack as many times as needed. To render the complete stack co
 </head>
 ```
 
-If you would like to prepend content onto the beginning of a stack, you should use the `@prepend` directive:
+Если вы хотите добавить содержимое в начало стека, вы должны использовать директиву `@prepend`:
 
 ```html
 @push('scripts')
@@ -1166,9 +1225,9 @@ If you would like to prepend content onto the beginning of a stack, you should u
 ```
 
 <a name="service-injection"></a>
-## Service Injection
+## Внедрение служб
 
-The `@inject` directive may be used to retrieve a service from the Laravel [service container](/docs/{{version}}/container). The first argument passed to `@inject` is the name of the variable the service will be placed into, while the second argument is the class or interface name of the service you wish to resolve:
+Директива `@inject` используется для извлечения службы из [контейнера служб](container) Laravel. Первый аргумент, переданный в `@inject`, – это имя переменной, в которую будет помещена служба, а второй аргумент – это имя класса или интерфейса службы, которую вы хотите извлечь:
 
 ```html
 @inject('metrics', 'App\Services\MetricsService')
@@ -1179,11 +1238,11 @@ The `@inject` directive may be used to retrieve a service from the Laravel [serv
 ```
 
 <a name="extending-blade"></a>
-## Extending Blade
+## Расширение Blade
 
-Blade allows you to define your own custom directives using the `directive` method. When the Blade compiler encounters the custom directive, it will call the provided callback with the expression that the directive contains.
+Blade позволяет вам определять ваши собственные пользовательские директивы с помощью метода `directive`. Когда компилятор Blade встречает вашу директиву, он вызывает указанное замыкание с выражением, содержащимся в директиве.
 
-The following example creates a `@datetime($var)` directive which formats a given `$var`, which should be an instance of `DateTime`:
+В следующем примере создается директива `@datetime($var)`, которая форматирует переданный `$var`, который должен быть экземпляром `DateTime`:
 
     <?php
 
@@ -1195,7 +1254,7 @@ The following example creates a `@datetime($var)` directive which formats a give
     class AppServiceProvider extends ServiceProvider
     {
         /**
-         * Register any application services.
+         * Регистрация любых служб приложения.
          *
          * @return void
          */
@@ -1205,7 +1264,7 @@ The following example creates a `@datetime($var)` directive which formats a give
         }
 
         /**
-         * Bootstrap any application services.
+         * Загрузка любых служб приложения.
          *
          * @return void
          */
@@ -1217,21 +1276,21 @@ The following example creates a `@datetime($var)` directive which formats a give
         }
     }
 
-As you can see, we will chain the `format` method onto whatever expression is passed into the directive. So, in this example, the final PHP generated by this directive will be:
+Как видите, мы привяжем метод `format` к любому выражению, переданному в директиву. Итак, в этом примере окончательный PHP, сгенерированный этой директивой, будет:
 
     <?php echo ($var)->format('m/d/Y H:i'); ?>
 
-> {note} After updating the logic of a Blade directive, you will need to delete all of the cached Blade views. The cached Blade views may be removed using the `view:clear` Artisan command.
+> {note} После обновления логики директивы Blade вам нужно будет удалить все кешированные шаблоны Blade. Кешированные шаблоны Blade могут быть удалены с помощью команды `view:clear` Artisan.
 
 <a name="custom-if-statements"></a>
-### Custom If Statements
+### Пользовательские операторы If
 
-Programming a custom directive is sometimes more complex than necessary when defining simple, custom conditional statements. For that reason, Blade provides a `Blade::if` method which allows you to quickly define custom conditional directives using closures. For example, let's define a custom conditional that checks the configured default "disk" for the application. We may do this in the `boot` method of our `AppServiceProvider`:
+Программирование пользовательской директивы иногда бывает более сложным, чем необходимо при определении простых пользовательских условных операторов. По этой причине Blade содержит метод `Blade::if`, который позволяет быстро определять пользовательские условные директивы с помощью замыканий. Например, давайте определим условие, которое проверяет настроенный по умолчанию «диск» приложения. Мы можем сделать это в методе `boot` нашего `AppServiceProvider`:
 
     use Illuminate\Support\Facades\Blade;
 
     /**
-     * Bootstrap any application services.
+     * Загрузка любых служб приложения.
      *
      * @return void
      */
@@ -1242,7 +1301,7 @@ Programming a custom directive is sometimes more complex than necessary when def
         });
     }
 
-Once the custom conditional has been defined, you can use it within your templates:
+После того, как пользовательское условие было определено, вы можете использовать его в своих шаблонах:
 
 ```html
 @disk('local')

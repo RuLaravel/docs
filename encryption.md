@@ -1,26 +1,26 @@
-# Encryption
+# Laravel 8 · Шифрование
 
-- [Introduction](#introduction)
-- [Configuration](#configuration)
-- [Using The Encrypter](#using-the-encrypter)
+- [Введение](#introduction)
+- [Конфигурирование](#configuration)
+- [Использование шифровальщика](#using-the-encrypter)
 
 <a name="introduction"></a>
-## Introduction
+## Введение
 
-Laravel's encryption services provide a simple, convenient interface for encrypting and decrypting text via OpenSSL using AES-256 and AES-128 encryption. All of Laravel's encrypted values are signed using a message authentication code (MAC) so that their underlying value can not be modified or tampered with once encrypted.
+Сервисы шифрования Laravel предоставляют простой и удобный интерфейс для шифрования и дешифрования текста через OpenSSL с использованием шифрования AES-256 и AES-128. Все зашифрованные значения Laravel подписываются с использованием кода аутентификации сообщения (MAC), поэтому их базовое значение не может быть изменено или подделано после шифрования.
 
 <a name="configuration"></a>
-## Configuration
+## Конфигурирование
 
-Before using Laravel's encrypter, you must set the `key` configuration option in your `config/app.php` configuration file. This configuration value is driven by the `APP_KEY` environment variable. You should use the `php artisan key:generate` command to generate this variable's value since the `key:generate` command will use PHP's secure random bytes generator to build a cryptographically secure key for your application. Typically, the value of the `APP_KEY` environment variable will be generated for you during [Laravel's installation](/docs/{{version}}/installation).
+Перед использованием шифровальщика Laravel вы должны установить параметр `key` в конфигурационном файле `config/app.php`. Это значение конфигурации управляется переменной окружения `APP_KEY`. Вы должны использовать команду `php artisan key:generate` для генерации значения этой переменной, поскольку команда `key:generate` будет использовать безопасный генератор случайных байтов PHP для создания криптографически безопасного ключа для вашего приложения. Обычно значение переменной среды `APP_KEY` генерируется для вас во время [установки Laravel](installation).
 
 <a name="using-the-encrypter"></a>
-## Using The Encrypter
+## Использование шифровальщика
 
 <a name="encrypting-a-value"></a>
-#### Encrypting A Value
+#### Шифрование значения
 
-You may encrypt a value using the `encryptString` method provided by the `Crypt` facade. All encrypted values are encrypted using OpenSSL and the AES-256-CBC cipher. Furthermore, all encrypted values are signed with a message authentication code (MAC). The integrated message authentication code will prevent the decryption of any values that have been tampered with by malicious users:
+Вы можете зашифровать значение, используя метод `encryptString` фасада `Crypt`. Все значения будут зашифрованы с использованием OpenSSL и шифра `AES-256-CBC`. Кроме того, все зашифрованные значения подписываются кодом аутентификации сообщения (MAC). Встроенный код аутентификации сообщений предотвратит расшифровку любых значений, которые были подделаны злоумышленниками:
 
     <?php
 
@@ -34,7 +34,7 @@ You may encrypt a value using the `encryptString` method provided by the `Crypt`
     class DigitalOceanTokenController extends Controller
     {
         /**
-         * Store a DigitalOcean API token for the user.
+         * Сохраните DigitalOcean API-токен пользователя.
          *
          * @param  \Illuminate\Http\Request  $request
          * @return \Illuminate\Http\Response
@@ -48,9 +48,9 @@ You may encrypt a value using the `encryptString` method provided by the `Crypt`
     }
 
 <a name="decrypting-a-value"></a>
-#### Decrypting A Value
+#### Расшифровка значения
 
-You may decrypt values using the `decryptString` method provided by the `Crypt` facade. If the value can not be properly decrypted, such as when the message authentication code is invalid, an `Illuminate\Contracts\Encryption\DecryptException` will be thrown:
+Вы можете расшифровать значения, используя метод `decryptString` фасада `Crypt`. Если значение не может быть правильно расшифровано, например, когда код аутентификации сообщения недействителен, будет выброшено исключение `Illuminate\Contracts\Encryption\DecryptException`:
 
     use Illuminate\Contracts\Encryption\DecryptException;
     use Illuminate\Support\Facades\Crypt;

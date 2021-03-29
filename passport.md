@@ -120,7 +120,9 @@ Next, you should call the `Passport::routes` method within the `boot` method of 
         {
             $this->registerPolicies();
 
-            Passport::routes();
+            if (! $this->app->routesAreCached()) {
+                Passport::routes();
+            }
         }
     }
 
@@ -197,7 +199,7 @@ If you are not going to use Passport's default migrations, you should call the `
 <a name="upgrading-passport"></a>
 ### Upgrading Passport
 
-When upgrading to a new major version of Passport, it's important that you carefully review [the upgrade guide](https://github.com/laravel/passport/blob/master/UPGRADE.md).
+When upgrading to a new major version of Passport, it's important that you carefully review [the upgrade guide](https://github.com/laravel/passport/blob/master/UPGRADE).
 
 <a name="configuration"></a>
 ## Configuration
