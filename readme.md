@@ -1,7 +1,7 @@
-# Laravel Documentation
+# Laravel документация
 
-You can find the online version of the Laravel documentation at [https://laravel.com/docs](https://laravel.com/docs)
+Вы можете найти онлайн-версию русской документации Laravel по адресу [https://docs.rularavel.com](https://docs.rularavel.com)
 
-## Contribution Guidelines
+## Рекомендации по поддержке
 
-If you are submitting documentation for the **current stable release**, submit it to the corresponding branch. For example, documentation for Laravel 8 would be submitted to the `8.x` branch. Documentation intended for the next release of Laravel should be submitted to the `master` branch.
+Если вы отправляете документацию для **текущей стабильной версии**, отправьте ее в соответствующую ветку. Например, документация для Laravel 8 будет отправлена в ветку `8.x`. Документация, предназначенная для следующего выпуска Laravel, должна быть отправлена в ветку `master`.
