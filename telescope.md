@@ -36,7 +36,7 @@
 
 Telescope станет прекрасным помощником при локальной разработке приложения Laravel. Telescope дает представление о запросах, поступающих в ваше приложение, исключениях, записях журнала, запросах базы данных, поставленных в очередь заданиях, почте, уведомлениях, операциях кэша, запланированных задачах, дампах переменных и о многом другом.
 
-<img src="https://docs.rularavel.com/docs/img/telescope-example.png">
+<img src="https://docs.rularavel.com/img/docs/telescope-example.png">
 
 <a name="installation"></a>
 ## Установка

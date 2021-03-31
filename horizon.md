@@ -23,7 +23,7 @@ Laravel Horizon provides a beautiful dashboard and code-driven configuration for
 
 When using Horizon, all of your queue worker configuration is stored in a single, simple configuration file. By defining your application's worker configuration in a version controlled file, you may easily scale or modify your application's queue workers when deploying your application.
 
-<img src="https://docs.rularavel.com/docs/img/horizon-example.png">
+<img src="https://docs.rularavel.com/img/docs/horizon-example.png">
 
 <a name="installation"></a>
 ## Installation
