@@ -30,12 +30,12 @@
 <a name="eloquent-collection-conversion"></a>
 #### Преобразование коллекций Eloquent
 
-В то время как большинство методов коллекции Eloquent возвращают новый экземпляр коллекции Eloquent, методы `collapse`, `flatten`, `flip`, `keys`, `pluck`, и `zip` возвращают экземпляр [базовой коллекции](collections.md ). Аналогично, если метод `map` возвращает коллекцию, не содержащую никаких моделей Eloquent, она будет преобразована в экземпляр базовой коллекции.
+В то время как большинство методов коллекции Eloquent возвращают новый экземпляр коллекции Eloquent, методы `collapse`, `flatten`, `flip`, `keys`, `pluck`, и `zip` возвращают экземпляр [базовой коллекции](collections ). Аналогично, если метод `map` возвращает коллекцию, не содержащую никаких моделей Eloquent, она будет преобразована в экземпляр базовой коллекции.
 
 <a name="available-methods"></a>
 ## Доступные методы
 
-Все коллекции Eloquent расширяют базовый класс [коллекций Laravel](collections.md#available-methods); поэтому они наследуют все мощные методы, предоставляемые классом базовой коллекции.
+Все коллекции Eloquent расширяют базовый класс [коллекций Laravel](collections#available-methods); поэтому они наследуют все мощные методы, предоставляемые классом базовой коллекции.
 
 Кроме того, класс `Illuminate\Database\Eloquent\Collection` содержит расширенный набор методов, помогающих управлять коллекциями моделей. Большинство методов возвращают экземпляры `Illuminate\Database\Eloquent\Collection`; однако некоторые методы, такие как `modelKeys`, возвращают экземпляр `Illuminate\Support\Collection`.
 
@@ -151,14 +151,14 @@
 <a name="method-makeVisible"></a>
 #### `makeVisible($attributes)`
 
-Метод `makeVisible` [делает видимыми атрибуты](eloquent-serialization.md#hiding-attributes-from-json), которые обычно «скрыты» для каждой модели коллекции:
+Метод `makeVisible` [делает видимыми атрибуты](eloquent-serialization#hiding-attributes-from-json), которые обычно «скрыты» для каждой модели коллекции:
 
     $users = $users->makeVisible(['address', 'phone_number']);
 
 <a name="method-makeHidden"></a>
 #### `makeHidden($attributes)`
 
-Метод `makeHidden` [скрывает атрибуты](eloquent-serialization.md#hiding-attributes-from-json), которые обычно «видны» для каждой модели в коллекции:
+Метод `makeHidden` [скрывает атрибуты](eloquent-serialization#hiding-attributes-from-json), которые обычно «видны» для каждой модели в коллекции:
 
     $users = $users->makeHidden(['address', 'phone_number']);
 

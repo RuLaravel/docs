@@ -423,7 +423,7 @@
 
 Этот метод имеет ту же сигнатуру, что и метод [`contains`](#method-contains); однако, все значения сравниваются с использованием «жесткого» сравнения.
 
-> {tip} Поведение этого метода изменяется при использовании [коллекций Eloquent](eloquent-collections.md#method-contains).
+> {tip} Поведение этого метода изменяется при использовании [коллекций Eloquent](eloquent-collections#method-contains).
 
 <a name="method-count"></a>
 #### `count()`
@@ -533,7 +533,7 @@
 
     // [1, 3, 5]
 
-> {tip} Поведение этого метода изменяется при использовании [коллекций Eloquent](eloquent-collections.md#method-diff).
+> {tip} Поведение этого метода изменяется при использовании [коллекций Eloquent](eloquent-collections#method-diff).
 
 <a name="method-diffassoc"></a>
 #### `diffAssoc()`
@@ -699,7 +699,7 @@
 
 Противоположным методу `except` является метод [only](#method-only).
 
-> {tip} Поведение этого метода изменяется при использовании [коллекций Eloquent](eloquent-collections.md#method-except).
+> {tip} Поведение этого метода изменяется при использовании [коллекций Eloquent](eloquent-collections#method-except).
 
 <a name="method-filter"></a>
 #### `filter()`
@@ -1043,7 +1043,7 @@
 
     // [0 => 'Desk', 2 => 'Chair']
 
-> {tip} Поведение этого метода изменяется при использовании [коллекций Eloquent](eloquent-collections.md#method-intersect).
+> {tip} Поведение этого метода изменяется при использовании [коллекций Eloquent](eloquent-collections#method-intersect).
 
 <a name="method-intersectbykeys"></a>
 #### `intersectByKeys()`
@@ -1445,7 +1445,7 @@
 
 Противоположным методу `only` является метод [except](#method-except).
 
-> {tip} Поведение этого метода изменяется при использовании [коллекций Eloquent](eloquent-collections.md#method-only).
+> {tip} Поведение этого метода изменяется при использовании [коллекций Eloquent](eloquent-collections#method-only).
 
 <a name="method-pad"></a>
 #### `pad()`
@@ -2432,7 +2432,7 @@
 
 Метод `unique` использует «гибкое» сравнение при проверке значений элементов, то есть строка с целым значением будет считаться равной целому числу того же значения. Используйте метод [`uniqueStrict`](#method-uniquestrict) для фильтрации с использованием «жесткого» сравнения.
 
-> {tip} Поведение этого метода изменяется при использовании [коллекций Eloquent](eloquent-collections.md#method-unique).
+> {tip} Поведение этого метода изменяется при использовании [коллекций Eloquent](eloquent-collections#method-unique).
 
 <a name="method-uniquestrict"></a>
 #### `uniqueStrict()`

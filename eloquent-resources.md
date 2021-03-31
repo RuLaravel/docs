@@ -595,7 +595,7 @@
         ];
     }
 
-Если ваши отношения используют [пользовательскую модель сводной таблицы](eloquent-relationships.md#defining-custom-intermediate-table-models), то вы можете передать экземпляр модели сводной таблицы в качестве первого аргумента методу `whenPivotLoaded`. :
+Если ваши отношения используют [пользовательскую модель сводной таблицы](eloquent-relationships#defining-custom-intermediate-table-models), то вы можете передать экземпляр модели сводной таблицы в качестве первого аргумента методу `whenPivotLoaded`. :
 
     'expires_at' => $this->whenPivotLoaded(new Membership, function () {
         return $this->pivot->expires_at;

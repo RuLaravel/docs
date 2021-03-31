@@ -82,7 +82,7 @@
 
 Перед использованием драйвера кеша Redis, вам нужно будет либо установить расширение PHP PhpRedis через PECL, либо установить пакет `predis/predis` (~ 1.0) через Composer. [Laravel Sail](sail) уже включает это расширение. Кроме того, на официальных платформах развертывания Laravel, таких как [Laravel Forge](https://forge.laravel.com) и [Laravel Vapor](https://vapor.laravel.com), расширение PhpRedis установлено по умолчанию.
 
-Для получения дополнительной информации о настройке Redis обратитесь к его [странице документации Laravel](redis.md#configuration).
+Для получения дополнительной информации о настройке Redis обратитесь к его [странице документации Laravel](redis#configuration).
 
 <a name="cache-usage"></a>
 ## Управление кешем приложения
@@ -249,7 +249,7 @@
         return DB::table('users')->get();
     });
 
-> {tip} При тестировании вызова глобальной функции `cache` вы можете использовать метод `Cache::shouldReceive` так же, как если бы вы [тестировали фасад](mocking.md#mocking-facades).
+> {tip} При тестировании вызова глобальной функции `cache` вы можете использовать метод `Cache::shouldReceive` так же, как если бы вы [тестировали фасад](mocking#mocking-facades).
 
 <a name="cache-tags"></a>
 ## Тегированный кеш

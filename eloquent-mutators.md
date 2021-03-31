@@ -70,7 +70,7 @@
         return "{$this->first_name} {$this->last_name}";
     }
 
-> {tip} Если вы хотите, чтобы эти вычисленные значения были добавлены к представлениям массива / JSON вашей модели, [вам нужно будет добавить их](eloquent-serialization.md#appending-values-to-json).
+> {tip} Если вы хотите, чтобы эти вычисленные значения были добавлены к представлениям массива / JSON вашей модели, [вам нужно будет добавить их](eloquent-serialization#appending-values-to-json).
 
 <a name="defining-a-mutator"></a>
 ### Определение мутатора

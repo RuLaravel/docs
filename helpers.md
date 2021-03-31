@@ -973,7 +973,7 @@ Laravel содержит множество глобальных «вспомо�
 <a name="method-mix"></a>
 #### `mix()`
 
-Функция `mix` возвращает путь к [версионированному файлу Mix](mix.md#versioning-and-cache-busting):
+Функция `mix` возвращает путь к [версионированному файлу Mix](mix#versioning-and-cache-busting):
 
     $path = mix('css/app.css');
 
@@ -2474,7 +2474,7 @@ If no matches are found, an empty collection will be returned.
 <a name="method-route"></a>
 #### `route()`
 
-Функция `route` генерирует URL для переданного [именованного маршрута](routing.md#named-routes):
+Функция `route` генерирует URL для переданного [именованного маршрута](routing#named-routes):
 
     $url = route('route.name');
 
@@ -2525,7 +2525,7 @@ If no matches are found, an empty collection will be returned.
 <a name="method-abort"></a>
 #### `abort()`
 
-Функция `abort` генерирует [HTTP-исключение](errors.md#http-exceptions), которое будет обработано [обработчиком исключения](errors.md#the-exception-handler):
+Функция `abort` генерирует [HTTP-исключение](errors#http-exceptions), которое будет обработано [обработчиком исключения](errors#the-exception-handler):
 
     abort(403);
 
@@ -2576,7 +2576,7 @@ If no matches are found, an empty collection will be returned.
 <a name="method-back"></a>
 #### `back()`
 
-Функция `back` генерирует [HTTP-ответ перенаправления](responses.md#redirects) в предыдущее расположение пользователя:
+Функция `back` генерирует [HTTP-ответ перенаправления](responses#redirects) в предыдущее расположение пользователя:
 
     return back($status = 302, $headers = [], $fallback = '/');
 
@@ -2663,7 +2663,7 @@ If no matches are found, an empty collection will be returned.
 <a name="method-cookie"></a>
 #### `cookie()`
 
-Функция `cookie` создает новый экземпляр [Cookie](requests.md#cookies):
+Функция `cookie` создает новый экземпляр [Cookie](requests#cookies):
 
     $cookie = cookie('name', 'value', $minutes);
 
@@ -2695,14 +2695,14 @@ If no matches are found, an empty collection will be returned.
 <a name="method-dispatch"></a>
 #### `dispatch()`
 
-Функция `dispatch` помещает переданное [задание](queues.md#creating-jobs) в [очередь заданий](queues) Laravel:
+Функция `dispatch` помещает переданное [задание](queues#creating-jobs) в [очередь заданий](queues) Laravel:
 
     dispatch(new App\Jobs\SendEmails);
 
 <a name="method-dispatch-now"></a>
 #### `dispatch_now()`
 
-Функция `dispatch_now` немедленно запускает переданное [задание](queues.md#creating-jobs), и возвращает значение метода `handle`:
+Функция `dispatch_now` немедленно запускает переданное [задание](queues#creating-jobs), и возвращает значение метода `handle`:
 
     $result = dispatch_now(new App\Jobs\SendEmails);
 
@@ -2720,7 +2720,7 @@ If no matches are found, an empty collection will be returned.
 <a name="method-env"></a>
 #### `env()`
 
-Функция `env` возвращает значение [переменной окружения](configuration.md#environment-configuration) или значение по умолчанию:
+Функция `env` возвращает значение [переменной окружения](configuration#environment-configuration) или значение по умолчанию:
 
     $env = env('APP_ENV');
 
@@ -2777,7 +2777,7 @@ If no matches are found, an empty collection will be returned.
 
     logger('User has logged in.', ['id' => $user->id]);
 
-Если функции не передано значение, то будет возвращен экземпляр [регистратора](errors.md#logging):
+Если функции не передано значение, то будет возвращен экземпляр [регистратора](errors#logging):
 
     logger()->error('You are not allowed here.');
 
@@ -2800,7 +2800,7 @@ If no matches are found, an empty collection will be returned.
 <a name="method-old"></a>
 #### `old()`
 
-Функция `old` [возвращает](requests.md#retrieving-input) значение [прежнего ввода](requests.md#old-input), краткосрочно сохраненное в сессии:
+Функция `old` [возвращает](requests#retrieving-input) значение [прежнего ввода](requests#old-input), краткосрочно сохраненное в сессии:
 
     $value = old('value');
 
@@ -2824,14 +2824,14 @@ If no matches are found, an empty collection will be returned.
 <a name="method-policy"></a>
 #### `policy()`
 
-Функция `policy` извлекает экземпляр [политики](authorization.md#creating-policies) для переданного класса:
+Функция `policy` извлекает экземпляр [политики](authorization#creating-policies) для переданного класса:
 
     $policy = policy(App\Models\User::class);
 
 <a name="method-redirect"></a>
 #### `redirect()`
 
-Функция `redirect` возвращает [HTTP-ответ перенаправления](responses.md#redirects) или возвращает экземпляр перенаправителя, если вызывается без аргументов:
+Функция `redirect` возвращает [HTTP-ответ перенаправления](responses#redirects) или возвращает экземпляр перенаправителя, если вызывается без аргументов:
 
     return redirect($to = null, $status = 302, $headers = [], $https = null);
 
@@ -2842,7 +2842,7 @@ If no matches are found, an empty collection will be returned.
 <a name="method-report"></a>
 #### `report()`
 
-Функция `report` сообщит об исключении, используя ваш [обработчик исключений](errors.md#the-exception-handler):
+Функция `report` сообщит об исключении, используя ваш [обработчик исключений](errors#the-exception-handler):
 
     report($e);
 
@@ -2862,7 +2862,7 @@ If no matches are found, an empty collection will be returned.
 <a name="method-rescue"></a>
 #### `rescue()`
 
-Функция `rescue` выполняет переданное замыкание и перехватывает любые исключения, возникающие во время его выполнения. Все перехваченные исключения будут отправлены вашему [обработчику исключений](errors.md#the-exception-handler); однако, обработка запроса будет продолжена:
+Функция `rescue` выполняет переданное замыкание и перехватывает любые исключения, возникающие во время его выполнения. Все перехваченные исключения будут отправлены вашему [обработчику исключений](errors#the-exception-handler); однако, обработка запроса будет продолжена:
 
     return rescue(function () {
         return $this->method();

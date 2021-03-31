@@ -196,7 +196,7 @@
 <a name="customizing-the-date-format-per-attribute"></a>
 #### Настройка формата даты для каждого атрибута
 
-Вы можете настроить формат сериализации отдельных атрибутов даты, указав формат даты при [объявлении типизации](eloquent-mutators.md#attribute-casting) модели:
+Вы можете настроить формат сериализации отдельных атрибутов даты, указав формат даты при [объявлении типизации](eloquent-mutators#attribute-casting) модели:
 
     protected $casts = [
         'birthday' => 'date:Y-m-d',
